@@ -45,14 +45,34 @@ p.update()
 
 
 
-<br><br>
+<br><br><br>
 
 
 
 
-##  Features
+##  Pacer features
 
-With all the tweening and keyframing libraries already out there, why build a new one? Well, we write _a lot_ of JavaScript and we have _strong opinions_ about the libraries we use and the code we write. Sometimes that drives us to rip it all up and start afresh. 
+With all the tweening and keyframing libraries already out there, why build a new one? Well, we write _a lot_ of JavaScript and we have _strong opinions_ about the libraries we use and the code we write. Sometimes that drives us to rip it all up and start afresh. Here are some aspects we gave particular attention to:
+
+1. [Legible code](#legible-code)  
+2. [Function chaining](#function-chaining)  
+3. [Relative _and_ absolute timestamps](#relative-and-absolute-timestamps)  
+4. [Tweening](#tweening)  
+5. [Every key / every tween](#every-key--every-tween)  
+6. [Access within callbacks](#access-within-callbacks)  
+7. [Update all instances](#update-all-instances)  
+8. [Updating time](#updating-time)  
+9. [Forward _and_ backward](#forward-and-backward)  
+10. [Reduce, reuse, recycle](#reduce-reuse-recycle)  
+11. [Burn it to the ground](#burn-it-to-the-ground)  
+12. [Guaranteed keyframes](#guaranteed-keyframes)  
+13. [Outside the box](#outside-the-box)  
+14. [Verbose example](#verbose-example)  
+
+
+
+
+<br>
 
 
 
@@ -72,7 +92,7 @@ Expanding on the above, a code block should read like a normal paragraph of text
 
 
 
-###  Relative _and_ absolute
+###  Relative _and_ absolute timestamps
 
 By default, keyframes are specificed by _relative_ time. (“Do this two seconds after that last keyframe.”) This makes it trivial to swap pieces of an animation around—just cut and paste—without having to redo all the keyframe timings. Our TL;DR example uses the `key` command to illustrate this workflow, but we could have also used the slightly more descriptive `rel` (“relative”) alias to accomplish the exact same thing. All relative times are relative to the chronologically-latest keyframe as determined the moment the `key` or `rel` command is processed. (And yes, you can specify a _negative_ relative time—if you’re into that sort of thing.) What about your _first_ keyframe—which has no prior keyframe to be relative to? Consider it relative to _zero_—which makes it both relative _and_ absolute. Note the use of the alias `rel` here rather than `key`:
 
@@ -233,7 +253,7 @@ And because `onKey` and `onTween` provide the same callback arguments, it’s tr
 ```javascript
 var callback = ( e, p )=> console.log( 
 	'Step:', p.keyIndex + 1,
-	'value:', e.n ),
+	'value:', e.n )
 
 new Pacer()
 .key( Date.now(), { n: 0 })
@@ -260,7 +280,7 @@ Another thing to note is that `update` expects an _absolute_ number, rather than
 
 
 
-###  Forward & backward
+###  Forward _and_ backward
 
 Mathematically, [time can flow both forward _and_ backward](https://en.wikipedia.org/wiki/Tenet_(film)). Why would __Pacer__ ignore that reality? The ability to scrub a timeline back and forth is incredibly valuable, and literally the mechanism that our __ScrollPacer__ toolkit uses for scroll-based animations. (More on this to come.) Rest assured that your `update` call can handle time flowing in either direction (and at any speed). It just works.
 
@@ -492,8 +512,8 @@ var p = new Pacer( 'My first Pacer' )
 .onBeforeAll(( e, p )=> console.log( 
 	
 	'“Theoretical” step:', p.keyIndex + 1,
-	'value:', e.n )
-)
+	'value:', e.n
+))
 
 
 //  Similarly, for “after” `keyIndex` will be 
@@ -505,8 +525,8 @@ var p = new Pacer( 'My first Pacer' )
 .onAfterAll(( e, p )=> console.log( 
 	
 	'“Theoretical” step:', p.keyIndex + 1,
-	'value:', e.n )
-)
+	'value:', e.n
+))
 
 
 //  This sequence effectively does nothing
