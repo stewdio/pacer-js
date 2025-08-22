@@ -123,7 +123,7 @@ class Pacer {
 		this.keyIndex = -1
 		this.lastTouchedKey = null
 		
-		this.current = {}
+		this.values = {}
 		this.n = 0
 		this._label = ''
 	
@@ -175,8 +175,8 @@ class Pacer {
 		
 		}, {})
 		
-		this.current  = c
-		this.currentN = n
+		this.values = c
+		this.n = n
 		return n
 	}
 
@@ -234,6 +234,7 @@ class Pacer {
 			
 			time += this.getLastKey().timeAbsolute
 		}
+		if( this.keys.length === 0 ) this.values = values
 		const key = new Key( time, values )
 		this.lastTouchedKey = key
 		this.keys.push( key )
@@ -440,7 +441,7 @@ class Pacer {
 					}
 					if( typeof this._onEveryKey === 'function' ){
 
-						this._onEveryKey( this.current, this )
+						this._onEveryKey( this.values, this )
 					}
 				}
 			}
@@ -464,7 +465,7 @@ class Pacer {
 					}
 					if( typeof this._onEveryKey === 'function' ){
 
-						this._onEveryKey( this.current, this )
+						this._onEveryKey( this.values, this )
 					}
 				}
 			}
@@ -502,7 +503,7 @@ class Pacer {
 			typeof this._onBefore === 'function' ){
 
 			this.tweenKeys( keyA, keyB, now )
-			this._onBefore( this.current, this )
+			this._onBefore( this.values, this )
 			//  Note: We are NOT calling this._onEveryTween().
 			return this
 		}
@@ -510,7 +511,7 @@ class Pacer {
 			typeof this._onAfter === 'function' ){
 			
 			this.tweenKeys( keyA, keyB, now )
-			this._onAfter( this.current, this )
+			this._onAfter( this.values, this )
 			//  Note: We are NOT calling this._onEveryTween().
 			return this
 		}
@@ -520,11 +521,11 @@ class Pacer {
 			this.tweenKeys( keyA, keyB, now )
 			if( typeof keyA._onTween === 'function' ){
 
-				keyA._onTween( this.current, this )
+				keyA._onTween( this.values, this )
 			}
 			if( typeof this._onEveryTween === 'function' ){
 
-				this._onEveryTween( this.current, this )
+				this._onEveryTween( this.values, this )
 			}
 		}
 		

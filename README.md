@@ -45,7 +45,7 @@ p.update()
 
 
 
-<br><br><br>
+<br><br><br><br>
 
 
 
@@ -60,7 +60,7 @@ With all the tweening and keyframing libraries already out there, why build a ne
 4. [Tweening](#tweening)  
 5. [Every key / every tween](#every-key--every-tween)  
 6. [Access within callbacks](#access-within-callbacks)  
-7. [Update all instances](#update-all-instances)  
+7. [Update all instances at once](#update-all-instances-at-once)  
 8. [Updating time](#updating-time)  
 9. [Forward _and_ backward](#forward-and-backward)  
 10. [Reduce, reuse, recycle](#reduce-reuse-recycle)  
@@ -68,11 +68,6 @@ With all the tweening and keyframing libraries already out there, why build a ne
 12. [Guaranteed keyframes](#guaranteed-keyframes)  
 13. [Outside the box](#outside-the-box)  
 14. [Verbose example](#verbose-example)  
-
-
-
-
-<br>
 
 
 
@@ -187,7 +182,7 @@ Each easing equation includes its `in`, `out`, and `inOut` variants, eg. `Pacer.
 
 ###  Every key / every tween
 
-If you find you’re running the same callback over and over, perhaps you’d prefer to declare that just once? We’ve got you covered. Use `onEveryKey` to declare a callback that will fire on _every_ keyframe, and `onEveryTween` to do the same for all tweens. [Something borrowed, something blue. Every tween callback for you](https://youtu.be/OMaycNcPsHI?feature=shared).  
+If you find you’re running the same callback over and over, perhaps you’d prefer to declare that just once? We’ve got you covered. Use `onEveryKey` to declare a callback that will fire on _every_ keyframe, and `onEveryTween` to do the same for all tweens. [Something borrowed, something blue. Every tween callback for you](https://youtu.be/4YR_Mft7yIM).  
 
 
 ```javascript
@@ -211,24 +206,19 @@ var p = new Pacer()
 .key( Date.now() )
 .key( 1000 )
 .key( 1000 )
-.onEveryKey(( e, p )=>{
-
-	console.log( 'Step #', p.keyIndex + 1, 
-		'of', p.keys.length )
-})
-.onEveryTween(( e, p )=>{
-
-	console.log( 'Between #', p.keyIndex + 1, 
-		'and', p.keyIndex + 2 )
-})
+.onEveryKey(( e, p )=> console.log( 
+	
+	'Step #', p.keyIndex + 1, 
+	'of', p.keys.length 
+))
+.onEveryTween(( e, p )=> console.log( 
+	
+	'Between #', p.keyIndex + 1, 
+	'and', p.keyIndex + 2
+))
 ```
 
-
-
-
-###  Update all instances
-
-This means in theory you don’t even have to name your __Pacer__ instance if all you want to do is reference the instance within your callbacks. Note the lack of assignment here:
+This means in theory you don’t even have to name your __Pacer__ instance if all you want to do is reference that instance within your callbacks. Note the lack of assignment here:
 
 
 ```javascript
@@ -236,13 +226,19 @@ new Pacer()
 .key( Date.now() )
 .key( 1000 )
 .key( 1000 )
-.onEveryKey(( e, p )=>{
-
-	console.log( 'Step #', p.keyIndex + 1, 
-		'of', p.keys.length )
-})
+.onEveryKey(( e, p )=> console.log( 
+	
+	'Step #', p.keyIndex + 1, 
+	'of', p.keys.length
+))
 ```
-But how do you update an unnamed instance? Under the hood, __Pacer__ keeps a reference to all created instances in its `Pacer.all` array. You can update every single instance at once by sticking this in your animation loop:
+
+
+
+
+###  Update all instances at once
+
+But how do you update an _unnamed_ instance? Under the hood, __Pacer__ keeps a reference to all created instances in its `Pacer.all` array. You can update every single instance at once by sticking this in your animation loop:
 
 ```javascript
 Pacer.update()
@@ -251,16 +247,17 @@ Pacer.update()
 And because `onKey` and `onTween` provide the same callback arguments, it’s trivial to use the same callback for both.
 
 ```javascript
-var callback = ( e, p )=> console.log( 
-	'Step:', p.keyIndex + 1,
-	'value:', e.n )
+var myCallback = ( e, p )=> console.log( 
 
+	'Step:', p.keyIndex + 1,
+	'value:', e.n
+)
 new Pacer()
 .key( Date.now(), { n: 0 })
 .key( 1000, { n: 100 })
 .key( 1000, { n: 200 })
-.onEveryKey(   callback )
-.onEveryTween( callback )
+.onEveryKey(   myCallback )
+.onEveryTween( myCallback )
 ```
 
 
