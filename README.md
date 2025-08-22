@@ -479,6 +479,11 @@ var p = new Pacer( 'My first Pacer' )
 
 .key( 2000, { n: 500 })
 .label( 'Let’s stop labeling things now.' )
+.onKey(( e, p )=>{
+
+	if( p.direction > 0 ) console.log( 'display none!' )
+	else console.log( 'display block again.' )
+})
 .tween( Pacer.bounce.inOut )
 .onTween(( e, p )=> console.log( 
 	

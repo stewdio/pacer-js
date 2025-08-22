@@ -66,6 +66,7 @@ class Pacer {
 		
 		this.values = {}
 		this.n = 0
+		this.direction = 1
 	
 		this.instanceIndex = Pacer.all.length
 		this.isEnabled = true
@@ -336,6 +337,15 @@ class Pacer {
 		}
 
 
+		//  Let’s prep for calling onKey --
+		//  You never know what someone’s callbacks
+		//  are going to ask for on this instance!
+
+		const keyIndexPrior = this.keyIndex
+		this.n = 0
+		this.direction = direction
+
+
 
 
 
@@ -362,7 +372,7 @@ class Pacer {
 
 		if( direction > 0 ){
 
-			for( let i = this.keyIndex + 1; i <= targetIndex; i ++ ){
+			for( let i = keyIndexPrior + 1; i <= targetIndex; i ++ ){
 
 
 				//  Yes, we do expect (and are accounting for!) 
@@ -372,6 +382,7 @@ class Pacer {
 				//  You are going to be ok. Okay. O.K. OK.
 
 				const tempKey = this.keys[ i ]
+				this.keyIndex = i
 				if( tempKey instanceof Key &&
 					tempKey.guarantee === true ){
 
@@ -388,7 +399,7 @@ class Pacer {
 		}
 		else if( direction < 0 ){
 
-			for( let i = this.keyIndex; i > targetIndex; i -- ){
+			for( let i = keyIndexPrior; i > targetIndex; i -- ){
 
 			
 				//  See above disclaimer about expecting 
@@ -396,6 +407,7 @@ class Pacer {
 				//  of this.keys[].
 
 				const tempKey = this.keys[ i ]
+				this.keyIndex = i
 				if( tempKey instanceof Key &&
 					tempKey.guarantee === true ){
 
