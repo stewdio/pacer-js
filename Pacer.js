@@ -28,73 +28,14 @@
 
 
 
+import {
 
+	isUsefulNumber,
+	isNotUsefulNumber,
+	normalize,
+	lerp
 
-
-
-//  The following are pulled from my `shoes.js` helper toolkit.
-//  Why copy and past code here instead of `import` or `require` it?
-//  Because we want a streamlined, batteries included,
-//  lowest barrier to entry approach. This is bullet proof. 
-
-function isUsefulNumber( n ){
-
-	return (
-
-
-		//  This seems obvious right?
-		//  Handles Number literals, variables that store Number literals,
-		//  and even objects created by `new Number()` should you ever do that.
-
-		( typeof n === 'number' || n instanceof Number ) &&
-	
-
-		//  While `NaN instanceof Number` evaluates to `false`,
-		// `typeof NaN` evaluates to 'number' so `NaN` actually pass thru above.
-		//  Time to fix that.
-
-		isNaN( n ) === false && 
-		
-		
-		// `isFinite` uses type coercion, so does NOT guarantee this is a Number. 
-		//  Example: `isFinite( null )` becomes `isFinite( 0 )` which evaluates to true.
-		//  Thankfully we have already guaranteed that `n` is numeric above.
-		//  Note that this replaces `n !== Inifinity` 
-		//  but also the lesser known gotcha of `n !== -Inifinity` !
-
-		isFinite( n )
-	)
-}
-function isNotUsefulNumber( n ){
-
-	return !isUsefulNumber( n )
-}
-function normalize( n, minOrRange, max ){
-
-	let 
-	min   = 0,
-	range = minOrRange
-
-	if( isUsefulNumber( max )){
-	
-		min = minOrRange
-		range = max - min
-	}
-	return ( n - min ) / range
-}
-function lerp( n, minOrRange, max ){
-
-	let 
-	min   = 0,
-	range = minOrRange
-
-	if( isUsefulNumber( max )){
-	
-		min = minOrRange
-		range = max - min
-	}
-	return min + range * n
-}
+} from 'shoes-js'
 
 
 
@@ -156,7 +97,7 @@ class Pacer {
 	tweenKeys( keyA, keyB, now ){
 
 		const 
-		n = normalize(//  Do NOT clamp this! Out of range values needed for .onBefore() and .onAfter().
+		n = normalize(//  Do NOT constrain this! Out of range values needed for .onBefore() and .onAfter().
 
 			now,
 			keyA.timeAbsolute,
@@ -588,7 +529,6 @@ class Pacer {
 
 	//  STATICS: `this === Pacer`
 
-	static revision = 2
 	static all = []
 	static update( now ){
 

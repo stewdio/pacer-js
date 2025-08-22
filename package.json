@@ -1,0 +1,31 @@
+{
+  "name": "pacer-js",
+  "version": "1.0.0",
+  "description": "Getting you from A to B since 2025.",
+  "keywords": [
+    "animation",
+    "keyframe",
+    "tween",
+    "ease",
+    "pace",
+    "shoes"
+  ],
+  "homepage": "https://github.com/stewdio/pacer-jsr#readme",
+  "bugs": {
+    "url": "https://github.com/stewdio/pacer-js/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stewdio/pacer-js.git"
+  },
+  "license": "MIT",
+  "author": "Stewart Smith",
+  "type": "module",
+  "main": "Pacer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "shoes-js": "^1.0.1"
+  }
+}
