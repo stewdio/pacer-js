@@ -38,7 +38,8 @@ var p = new Pacer()
 
 .key( 2000, { n: 1 })
 .onKey(( e )=> console.log( '2 seconds later', e.n ))
-.onTween(( e )=> console.log( 'Ooooh!', e.n ))
+.tween( Pacer.cubic.inOut )
+.onTween(( e )=> console.log( 'Tweened values!', e.n ))
 
 .key( 2000, { n: 2 })
 .onKey(( e )=> console.log( '2 more later', e.n ))
@@ -65,7 +66,7 @@ With all the tweening and keyframing libraries already out there, why build a ne
 2. [Function chaining](#function-chaining)  
 3. [Relative _and_ absolute timestamps](#relative-and-absolute-timestamps)  
 4. [Tweening](#tweening)  
-5. [Every key / every tween](#every-key--every-tween)  
+5. [Every key, every tween](#every-key-every-tween)  
 6. [Access within callbacks](#access-within-callbacks)  
 7. [Update all instances at once](#update-all-instances-at-once)  
 8. [Updating time](#updating-time)  
@@ -189,7 +190,7 @@ Each easing equation includes its `in`, `out`, and `inOut` variants, eg. `Pacer.
 
 
 
-###  Every key / every tween
+###  Every key, every tween
 
 If you find you’re running the same callback over and over, perhaps you’d prefer to declare that just once? We’ve got you covered. Use `onEveryKey` to declare a callback that will fire on _every_ keyframe, and `onEveryTween` to do the same for all tweens. [Something borrowed, something blue. Every tween callback for you](https://youtu.be/4YR_Mft7yIM).  
 
@@ -242,23 +243,12 @@ new Pacer()
 ))
 ```
 
-
-
-
-###  Update all instances at once
-
-But how do you update an _unnamed_ instance? Under the hood, __Pacer__ keeps a reference to all created instances in its `Pacer.all` array. You can update every single instance at once by sticking this in your animation loop:
-
-```javascript
-Pacer.update()
-```
-
 And because `onKey` and `onTween` provide the same callback arguments, it’s trivial to use the same callback for both.
 
 ```javascript
 var myCallback = ( e, p )=> console.log( 
 
-	'Step:', p.keyIndex + 1,
+	'Step #', p.keyIndex + 1,
 	'value:', e.n
 )
 new Pacer()
@@ -272,6 +262,17 @@ new Pacer()
 
 
 
+###  Update all instances at once
+
+But how do you update an _unnamed_ instance? Under the hood, __Pacer__ keeps a reference to all created instances in its `Pacer.all` array. You can update every single instance at once by sticking this in your animation loop:
+
+```javascript
+Pacer.update()
+```
+
+
+
+
 ###  Updating time
 
 You’ve seen that you can update your instance with `p.update()`, or all instances at once with `Pacer.update()`. But now you’re interested in finer control of your timing. When either the class or instance `update` method is called without arguments, __Pacer__ defaults to `Date.now()`, but you are free to use any numeric progression you choose. Perhaps you want to key off of `window.performance.now()` for finer accuraccy. Or maybe you’re building a scroll-based animation and you’re substituting `scrollY` (pixels) for time. Just pass your value via update:
@@ -279,9 +280,9 @@ You’ve seen that you can update your instance with `p.update()`, or all instan
 ```javascript
 p.update( numericValue )
 ```
-Be sure you’re consistent with your units. __Pacer__ isn’t going to magically understand that you’ve used seconds to declare keyframes, but milliseconds in your `update` call. That’s on you.
+Be sure you’re consistent with your units. __Pacer__ isn’t going to magically understand that you’ve used seconds to declare keyframes, but milliseconds in your `update` call. That’s on you. And don’t use one instance for timed animations, another for scrolling animations, and then expect the global `Pacer.update()` to cater to both. 
 
-Another thing to note is that `update` expects an _absolute_ number, rather than a _relative_ one. Repeatedly calling `p.update( 1000 )` will _not_ advance your animation by one second with each call. Instead it will lock your animation at its one second mark. Relative units are enormously useful for crafting (and recrafting) keyframes, but slightly less useful within the context of synchronization. It’s taken years of building projects like this to be able to feel confident in asserting this subtlety. 
+Another thing to note is that `update` expects an _absolute_ number, rather than a _relative_ one. (That’s “absolute” as in each number represents a distance from zero, not “absolute value” as in a non-negative number. __Pacer__’s `update` is perfectly happy to accept negative values for time.) Repeatedly calling `p.update( 1000 )` will _not_ advance your animation by one second with each call. Instead it will lock your animation at its absolute one second mark. Relative units are enormously useful for crafting (and recrafting) keyframes, but slightly less useful within the context of synchronization. It’s taken years of building projects like this to be able to feel confident in asserting this subtlety. 
 
 
 
@@ -417,7 +418,9 @@ Note that for both of these, `p.keyIndex` will be _out of range_ of `p.keys` (`-
 
 ```
 if keyIndex === -1 → onBeforeAll()
+
 if keyIndex 0..keys.length-1 → onEveryTween()
+
 if keyIndex === keys.length → onAfterAll()
 ```
 
