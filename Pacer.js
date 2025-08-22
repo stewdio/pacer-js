@@ -392,7 +392,8 @@ class Pacer {
 					}
 					if( typeof this._onEveryKey === 'function' ){
 
-						this._onEveryKey( this.values, this )
+						//this._onEveryKey( this.values, this )
+						this._onEveryKey( tempKey.values, this )
 					}
 				}
 			}
