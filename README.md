@@ -87,7 +87,6 @@ Your __Pacer__ code says what it does. We wanted it to read like a short story. 
 We did shorten some words, like “keyframe” → `key` and “between” → `tween`, but in each case we debated and only accepted the shortened terms when we felt the tradeoff between immediate clarity and simple brevity was acceptable. __Commands__ like `key` read as terse verbs and focus on simple assignment. (_“Keyframe_ this for me.”) __Event hooks__ like `onKey` always begin with an `on` prefix and facilitate callback functions. (“_On this keyframe,_ do this…”) 
 
 
-<br>
 
 
 ###  Function chaining
@@ -95,7 +94,6 @@ We did shorten some words, like “keyframe” → `key` and “between” → `
 Expanding on the above, a code block should read like a normal paragraph of text—one idea following another in a logical sequence. With __Pacer__ you declare a keyframe, and [chain](https://en.wikipedia.org/wiki/Method_chaining) another right onto it. Perhaps you add an `onTween` callback _between_ those keyframes. Just about every __Pacer__ method returns its own instance, so you can chain from one method to another, to another—like writing the sentences of a short story. 
 
 
-<br>
 
 
 ###  Relative _and_ absolute timestamps
@@ -152,7 +150,6 @@ p = new Pacer()
 ```
 
 
-<br>
 
 
 ###  Tweening
@@ -190,7 +187,6 @@ Just like `onKey`, the `tween` function applies to your _most recently declared_
 Each easing equation includes its `in`, `out`, and `inOut` variants, eg. `Pacer.cubic.in`, `Pacer.cubic.out`, and `Pacer.cubic.inOut`, so you can hit the ground running. But like… ease into it, tho.
 
 
-<br>
 
 
 ###  Every key / every tween
@@ -208,7 +204,6 @@ var p = new Pacer()
 ```
 
 
-<br>
 
 
 ###  Access within callbacks
@@ -248,7 +243,6 @@ new Pacer()
 ```
 
 
-<br>
 
 
 ###  Update all instances at once
@@ -276,7 +270,6 @@ new Pacer()
 ```
 
 
-<br>
 
 
 ###  Updating time
@@ -291,7 +284,6 @@ Be sure you’re consistent with your units. __Pacer__ isn’t going to magicall
 Another thing to note is that `update` expects an _absolute_ number, rather than a _relative_ one. Repeatedly calling `p.update( 1000 )` will _not_ advance your animation by one second with each call. Instead it will lock your animation at its one second mark. Relative units are enormously useful for crafting (and recrafting) keyframes, but slightly less useful within the context of synchronization. It’s taken years of building projects like this to be able to feel confident in asserting this subtlety. 
 
 
-<br>
 
 
 ###  Forward _and_ backward
@@ -299,7 +291,6 @@ Another thing to note is that `update` expects an _absolute_ number, rather than
 Mathematically, [time can flow both forward _and_ backward](https://en.wikipedia.org/wiki/Tenet_(film)). Why would __Pacer__ ignore that reality? The ability to scrub a timeline back and forth is incredibly valuable, and literally the mechanism that our __ScrollPacer__ toolkit uses for scroll-based animations. (More on this to come.) Rest assured that your `update` call can handle time flowing in either direction (and at any speed). It just works.
 
 
-<br>
 
 
 ###  Enable / disable
@@ -316,7 +307,6 @@ p.enable()
 ```
 
 
-<br>
 
 
 ###  Reduce, reuse, recycle
@@ -350,7 +340,6 @@ Pacer.removeAll()
 ```
 
 
-<br>
 
 
 ###  Guaranteed keyframe callbacks
@@ -373,7 +362,6 @@ However, on this current call to `update`, we have not merely reached Key Frame 
 As you’d hope, __Pacer__ will also call `onEveryKey` when it honors `onKey` for __B__ and __C__. Note that `onTween` and `onEveryTween` will _not_ be called for any values between __B__ and __C__ as we are not experiencing time between those keyframes. 
 
 
-<br>
 
 
 ###  Outside the box

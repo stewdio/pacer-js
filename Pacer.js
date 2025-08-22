@@ -66,7 +66,6 @@ class Pacer {
 		
 		this.values = {}
 		this.n = 0
-		this._label = ''
 	
 		this.instanceIndex = Pacer.all.length
 		this.isEnabled = true
@@ -138,7 +137,7 @@ class Pacer {
 		this.keys
 		.sort( function( a, b ){
 
-			return a.timeAbsolute < b.timeAbsolute
+			return a.timeAbsolute - b.timeAbsolute
 		})
 		.forEach( function( key, i, keys ){
 
@@ -432,7 +431,7 @@ class Pacer {
 		if( keyA instanceof Key !== true ||
 			keyB instanceof Key !== true ){
 
-			console.log( 'one of the keyframes was fucked.', keyA, keyB )
+			// console.log( 'one of the keyframes was unresolved.', keyA, keyB )
 			return this
 		}
 
