@@ -1,3 +1,6 @@
+//  Copyright ©️ 2025 Stewart Smith. See LICENSE for details.
+
+
 
 
 
@@ -11,19 +14,6 @@
 //                                          //
 
 
-
-
-//  Pacer.js is ©️ Stewart Smith, 2025. 
-//  All Rights Reserved. See LICENSE for details.
-
-//	If my whitespace makes you uncomfortable, 
-//	go weep into the bosom of your favorite dominatrix linter, 
-//	you feeble coward.
-
-//  Do you feel that every function must be an arrow function?
-//  I’m sorry you feel that way. Cry harder, feely boi.
-
-//	Line-ending semicolons are for perverts.
 
 
 
@@ -370,6 +360,7 @@ class Pacer {
 		//  but debugging the subtleties became a true ass pain,
 		//  so for clarity I separated them back out based on direction.
 
+		let hasKeyframed = false
 		if( direction > 0 ){
 
 			for( let i = keyIndexPrior + 1; i <= targetIndex; i ++ ){
@@ -389,11 +380,13 @@ class Pacer {
 					if( typeof tempKey._onKey === 'function' ){
 
 						tempKey._onKey( tempKey.values, this )
+						hasKeyframed = true
 					}
 					if( typeof this._onEveryKey === 'function' ){
 
 						//this._onEveryKey( this.values, this )
 						this._onEveryKey( tempKey.values, this )
+						hasKeyframed = true
 					}
 				}
 			}
@@ -415,10 +408,12 @@ class Pacer {
 					if( typeof tempKey._onKey === 'function' ){
 
 						tempKey._onKey( tempKey.values, this )
+						hasKeyframed = true
 					}
 					if( typeof this._onEveryKey === 'function' ){
 
 						this._onEveryKey( this.values, this )
+						hasKeyframed = true
 					}
 				}
 			}
@@ -438,51 +433,59 @@ class Pacer {
 		/////////////////
 
 
-		//  We need TWO valid keyframes in order to tween anything.
-		//  If we don’t got, we bail now.
+		//  If we have just keyframed during this update() loop,
+		//  no need to attempt to tween -- in fact that could
+		//  cause an awful stutter or bounce.
 
-		if( keyA instanceof Key !== true ||
-			keyB instanceof Key !== true ){
+		if( hasKeyframed !== true ){
 
-			// console.log( 'one of the keyframes was unresolved.', keyA, keyB )
-			return this
+
+			//  We need TWO valid keyframes in order to tween anything.
+			//  If we don’t got, we bail now.
+
+			if( keyA instanceof Key !== true ||
+				keyB instanceof Key !== true ){
+
+				// console.log( 'One of these keyframes was unresolved.', keyA, keyB )
+				return this
+			}
+
+
+			//  Do we need to implement onBefore with no valid keyB? 
+			//  Just pass keyA vals??? +++
+
+			if( targetIndex < 0 &&
+				typeof this._onBefore === 'function' ){
+
+				this.tweenKeys( keyA, keyB, now )
+				this._onBefore( this.values, this )
+				//  Note: We are NOT calling this._onEveryTween().
+				return this
+			}
+			if( targetIndex > this.keys.length - 1 && 
+				typeof this._onAfter === 'function' ){
+				
+				this.tweenKeys( keyA, keyB, now )
+				this._onAfter( this.values, this )
+				//  Note: We are NOT calling this._onEveryTween().
+				return this
+			}
+			if( targetIndex >= 0 && 
+				targetIndex < this.keys.length ){
+
+				this.tweenKeys( keyA, keyB, now )
+				if( typeof keyA._onTween === 'function' ){
+
+					keyA._onTween( this.values, this )
+				}
+				if( typeof this._onEveryTween === 'function' ){
+
+					this._onEveryTween( this.values, this )
+				}
+			}
 		}
 
-
-		//  Do we need to implement onBefore with no valid keyB? 
-		//  Just pass keyA vals???+++
-
-		if( targetIndex < 0 &&
-			typeof this._onBefore === 'function' ){
-
-			this.tweenKeys( keyA, keyB, now )
-			this._onBefore( this.values, this )
-			//  Note: We are NOT calling this._onEveryTween().
-			return this
-		}
-		if( targetIndex > this.keys.length - 1 && 
-			typeof this._onAfter === 'function' ){
 			
-			this.tweenKeys( keyA, keyB, now )
-			this._onAfter( this.values, this )
-			//  Note: We are NOT calling this._onEveryTween().
-			return this
-		}
-		if( targetIndex >= 0 && 
-			targetIndex < this.keys.length ){
-
-			this.tweenKeys( keyA, keyB, now )
-			if( typeof keyA._onTween === 'function' ){
-
-				keyA._onTween( this.values, this )
-			}
-			if( typeof this._onEveryTween === 'function' ){
-
-				this._onEveryTween( this.values, this )
-			}
-		}
-		
-		
 		return this
 	}
 
@@ -594,7 +597,7 @@ Object.entries({
 	cubic:       n => Math.pow( n, 3 ),
 	quartic:     n => Math.pow( n, 4 ),
 	quintic:     n => Math.pow( n, 5 ),
-	exponential: n => x === 0 ? 0 : Math.pow( 2, 10 * x - 10 ),
+	exponential: n => n === 0 ? 0 : Math.pow( 2, 10 * n - 10 ),
 	circular:    n => 1 - Math.sqrt( 1 - Math.pow( n, 2 )),
 	elastic:     n => {
 
@@ -652,3 +655,12 @@ export default Pacer
 
 
 
+
+//	If my whitespace makes you uncomfortable, 
+//	go weep into the bosom of your favorite dominatrix linter, 
+//	you feeble coward.
+
+//  Do you feel that every function must be an arrow function?
+//  I’m sorry you feel that way. Cry harder, feely boi.
+
+//	Line-ending semicolons are for perverts.
