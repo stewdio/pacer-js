@@ -1,14 +1,22 @@
 {
   "name": "pacer-js",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Getting you from A to B since 2025.",
   "keywords": [
+    "animate",
     "animation",
     "keyframe",
+    "keyframing",
     "tween",
+    "tweening",
     "ease",
+    "easing",
     "pace",
-    "shoes"
+    "pacer",
+    "pacer-js",
+    "pacing",
+    "shoes",
+    "shoes-js"
   ],
   "homepage": "https://github.com/stewdio/pacer-jsr#readme",
   "bugs": {
@@ -26,6 +34,6 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "shoes-js": "^1.0.1"
+    "shoes-js": "^1.0.2"
   }
 }

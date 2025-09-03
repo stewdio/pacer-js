@@ -23,6 +23,7 @@ import {
 	isUsefulNumber,
 	isNotUsefulNumber,
 	normalize,
+	normalize01,
 	lerp
 
 } from 'shoes-js'
@@ -49,6 +50,7 @@ class Pacer {
 	constructor( label ){
 		
 		this._label = label
+		this.units = 'ms'// ms, milliseconds, s, seconds, #, n, norm, normalize, normalized, %, percent
 
 		this.keys = []
 		this.keyIndex = -1
@@ -57,6 +59,7 @@ class Pacer {
 		this.values = {}
 		this.n = 0
 		this.direction = 1
+		this.isClamped = true
 	
 		this.instanceIndex = Pacer.all.length
 		this.isEnabled = true
@@ -70,7 +73,15 @@ class Pacer {
 
 	inspect(){
 
-		return [ this.timeStart, this.keys ]
+		// return [ this.timeStart, this.keys ]
+
+		return this.keys
+		.reduce( function( output, key ){
+
+
+			return output +'\n'+ key.timeAbsolute +' '+ JSON.stringify( key.values )
+
+		}, '\n'+ this._label )
 	}
 	getFirstKey(){
 
@@ -84,10 +95,29 @@ class Pacer {
 
 		return this.keys[ this.keyIndex ]
 	}
-	tweenKeys( keyA, keyB, now ){
+	tweenKeys( keyA, keyB, now, direction ){
+
+		if( isNotUsefulNumber( direction )) direction = 1
+		let tween = keyA.tween
+
+		
+		//  This logic is unnecessary,
+		//  but leaving it here for future reference.
+
+
+		// const tweenLabel = keyA.tween.label
+		// if( direction < 0 && tweenLabel !== 'linear' ){
+			
+		// 	let tweenStyle = keyA.tween.style			
+		// 	if( tweenStyle === 'in' ) tweenStyle = 'out'
+		// 	else if( tweenStyle === 'out' ) tweenStyle = 'in'
+		// 	console.log( tweenLabel, tweenStyle )
+		// 	tween = Pacer[ tweenLabel ][ tweenStyle ]
+		// }
 
 		const 
-		n = normalize(//  Do NOT constrain this! Out of range values needed for .onBefore() and .onAfter().
+		method = this.isClamped ? normalize01 : normalize,
+		n = method(
 
 			now,
 			keyA.timeAbsolute,
@@ -101,13 +131,15 @@ class Pacer {
 			if( isNotUsefulNumber( a )) return output
 			const b = keyB.values[ key ]	
 			if( isNotUsefulNumber( b )) return output
-			output[ key ] = lerp( keyA.tween( n ), a, b )
+			output[ key ] = lerp( tween( n ), a, b )
 			return output
 		
 		}, {})
+
+		
+		//  Make current values easily available on the instance.
 		
 		this.values = c
-		this.n = n
 		return n
 	}
 
@@ -152,6 +184,8 @@ class Pacer {
 				keys[ i - 1 ].values instanceof Object === true ){
 
 				keys[ i ].values = keys[ i - 1 ].values
+
+				//  There’s an argument to made for this instead of the above:
 				// keys[ i ].values = Object.assign( {}, keys[ i - 1 ].values )
 			}
 		})
@@ -257,6 +291,12 @@ class Pacer {
 		const direction = now < this.timeCursor ? -1 : 1
 
 
+		//  What’s our total N gain for the this entire instance?
+
+		const method = this.isClamped ? normalize01 : normalize
+		this.n = method( now, this.timeStart, this.timeStop )
+
+
 		//  We know our keys are already sorted by time,
 		//  and we’ve previously set the convenience variables
 		// `timeStart` and `timeStop`.
@@ -280,7 +320,7 @@ class Pacer {
 			keyA = this.keys[ 0 ]
 			keyB = this.keys[ 1 ]
 		}
-		else if( now > this.timeStop ){
+		else if( now >= this.timeStop ){
 				
 			targetIndex = this.keys.length//  Intentionally out of range.
 			keyA = this.keys[ this.keys.length - 2 ]
@@ -332,7 +372,6 @@ class Pacer {
 		//  are going to ask for on this instance!
 
 		const keyIndexPrior = this.keyIndex
-		this.n = 0
 		this.direction = direction
 
 
@@ -360,7 +399,6 @@ class Pacer {
 		//  but debugging the subtleties became a true ass pain,
 		//  so for clarity I separated them back out based on direction.
 
-		let hasKeyframed = false
 		if( direction > 0 ){
 
 			for( let i = keyIndexPrior + 1; i <= targetIndex; i ++ ){
@@ -380,13 +418,10 @@ class Pacer {
 					if( typeof tempKey._onKey === 'function' ){
 
 						tempKey._onKey( tempKey.values, this )
-						hasKeyframed = true
 					}
 					if( typeof this._onEveryKey === 'function' ){
 
-						//this._onEveryKey( this.values, this )
 						this._onEveryKey( tempKey.values, this )
-						hasKeyframed = true
 					}
 				}
 			}
@@ -408,12 +443,10 @@ class Pacer {
 					if( typeof tempKey._onKey === 'function' ){
 
 						tempKey._onKey( tempKey.values, this )
-						hasKeyframed = true
 					}
 					if( typeof this._onEveryKey === 'function' ){
 
-						this._onEveryKey( this.values, this )
-						hasKeyframed = true
+						this._onEveryKey( tempKey.values, this )
 					}
 				}
 			}
@@ -437,54 +470,49 @@ class Pacer {
 		//  no need to attempt to tween -- in fact that could
 		//  cause an awful stutter or bounce.
 
-		if( hasKeyframed !== true ){
+
+		//  We need TWO valid keyframes in order to tween anything.
+		//  If we don’t got, we bail now.
+
+		if( keyA instanceof Key !== true ||
+			keyB instanceof Key !== true ){
+
+			// console.warn( 'One of these keyframes was unresolved.', keyA, keyB )
+			return this
+		}
+		this.tweenKeys( keyA, keyB, now, direction )
 
 
-			//  We need TWO valid keyframes in order to tween anything.
-			//  If we don’t got, we bail now.
+		//  Do we need to implement onBefore with no valid keyB? 
+		//  Just pass keyA vals??? +++
 
-			if( keyA instanceof Key !== true ||
-				keyB instanceof Key !== true ){
+		if( targetIndex < 0 &&
+			typeof this._onBefore === 'function' ){
 
-				// console.log( 'One of these keyframes was unresolved.', keyA, keyB )
-				return this
+			this._onBefore( this.values, this )
+			//  Note: We are NOT calling this._onEveryTween().
+			return this
+		}
+		if( targetIndex > this.keys.length - 1 && 
+			typeof this._onAfter === 'function' ){
+			
+			this._onAfter( this.values, this )
+			//  Note: We are NOT calling this._onEveryTween().
+			return this
+		}
+		if( targetIndex >= 0 && 
+			targetIndex < this.keys.length ){
+
+			if( typeof keyA._onTween === 'function' ){
+
+				keyA._onTween( this.values, this )
 			}
+			if( typeof this._onEveryTween === 'function' ){
 
-
-			//  Do we need to implement onBefore with no valid keyB? 
-			//  Just pass keyA vals??? +++
-
-			if( targetIndex < 0 &&
-				typeof this._onBefore === 'function' ){
-
-				this.tweenKeys( keyA, keyB, now )
-				this._onBefore( this.values, this )
-				//  Note: We are NOT calling this._onEveryTween().
-				return this
-			}
-			if( targetIndex > this.keys.length - 1 && 
-				typeof this._onAfter === 'function' ){
-				
-				this.tweenKeys( keyA, keyB, now )
-				this._onAfter( this.values, this )
-				//  Note: We are NOT calling this._onEveryTween().
-				return this
-			}
-			if( targetIndex >= 0 && 
-				targetIndex < this.keys.length ){
-
-				this.tweenKeys( keyA, keyB, now )
-				if( typeof keyA._onTween === 'function' ){
-
-					keyA._onTween( this.values, this )
-				}
-				if( typeof this._onEveryTween === 'function' ){
-
-					this._onEveryTween( this.values, this )
-				}
+				this._onEveryTween( this.values, this )
 			}
 		}
-
+		
 			
 		return this
 	}
@@ -551,6 +579,16 @@ class Pacer {
 
 			p.update( now )
 		})
+		return this
+	}
+	static inspect(){
+
+		return this.all
+		.reduce( function( output, entry ){
+
+			return output +'\n'+ entry.inspect()
+		
+		}, '' )
 	}
 	static remove( instance ){
 
@@ -558,6 +596,7 @@ class Pacer {
 		const index = this.all.indexOf( instance )
 		this.all.splice( index, 1 )
 		instance = null
+		return this
 	}
 	static removeAll(){
 
@@ -573,13 +612,8 @@ class Pacer {
 			p.isEnabled = false
 		})
 		this.all = []
+		return this
 	}
-
-
-	//  Default tween.
-	// (Other tweens will be unpacked and added programmatically.)
-
-	static linear( n ){ return n }
 }
 
 
@@ -587,6 +621,12 @@ class Pacer {
 
 //  Tweening functions, aka Easing functions.
 // “Tween” is of course short for “between”, as in _between_ the keyframes.
+//  We’ll start with our default tween (no easing):
+
+Pacer.linear = function( n ){ return n }
+Pacer.linear.label = 'linear'
+
+
 //  Look how ’purty these symetric functions are boxed up.
 //  Down the road we ought to add Bezier() and Custom options.
 
@@ -623,10 +663,23 @@ Object.entries({
 
 	Pacer[ key ] = {
 
+		label: key,
 		in:    val,
 		out:   n => 1 - val( 1 - n ),
 		inOut: n => n < 0.5 ? val( n * 2 ) / 2 : val( n * 2 - 1 ) / 2 + 0.5
 	}
+
+
+	//  Why do this?
+	//  To make logic it easy to build logic off of this,
+	//  like “What is this tween and what’s its inverse?”
+
+	Pacer[ key ].in.label = key
+	Pacer[ key ].in.style = 'in'
+	Pacer[ key ].out.label = key
+	Pacer[ key ].out.style = 'out'
+	Pacer[ key ].inOut.label = key
+	Pacer[ key ].inOut.style = 'inOut'
 })
 
 
@@ -635,6 +688,7 @@ Object.entries({
 
 Pacer.bounce = {
 
+	label: 'bounce',
 	in: n => 1 - val( 1 - n ),
 	out: function( n, n1, d1 ){
 
@@ -647,6 +701,12 @@ Pacer.bounce = {
 	},
 	inOut: n => n < 0.5 ? val( n * 2 ) / 2 : val( n * 2 - 1 ) / 2 + 0.5
 }
+Pacer.bounce.in.label = 'bounce'
+Pacer.bounce.in.style = 'in'
+Pacer.bounce.out.label = 'bounce'
+Pacer.bounce.out.style = 'out'
+Pacer.bounce.inOut.label = 'bounce'
+Pacer.bounce.inOut.style = 'inOut'
 
 
 
