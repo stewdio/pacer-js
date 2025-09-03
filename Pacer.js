@@ -22,6 +22,7 @@ import {
 
 	isUsefulNumber,
 	isNotUsefulNumber,
+	isUsefulString,
 	normalize,
 	normalize01,
 	lerp
@@ -33,11 +34,13 @@ import {
 
 class Key {
 	
-	constructor( timeAbsolute, values ){
+	constructor( timeAbsolute, values, callback ){
 
 		this.timeAbsolute = timeAbsolute
 		this.values = values instanceof Object ? values : {}
+		this.onKey  = callback
 		this.tween  = Pacer.linear//  Default tween method is linear interpolation.
+		this.label  = ''
 		this.guarantee = true
 	}
 }
@@ -47,10 +50,10 @@ class Key {
 
 class Pacer {
 	
-	constructor( label ){
+	constructor( label, units ){
 		
-		this._label = label
-		this.units = 'ms'// ms, milliseconds, s, seconds, #, n, norm, normalize, normalized, %, percent
+		this._label = isUsefulString( label ) ? label : 'Untitled Pacer instance'
+		this._units = isUsefulString( units ) ? units : 'ms'// ms, milliseconds, s, seconds, #, n, norm, normalize, normalized, %, percent
 
 		this.keys = []
 		this.keyIndex = -1
@@ -60,9 +63,9 @@ class Pacer {
 		this.n = 0
 		this.direction = 1
 		this.isClamped = true
-	
-		this.instanceIndex = Pacer.all.length
+		
 		this.isEnabled = true
+		this.instanceIndex = Pacer.all.length
 		Pacer.all.push( this )
 	}
 	
@@ -71,17 +74,30 @@ class Pacer {
 
 	//  Non-chainable.
 
-	inspect(){
+	inspect( useRelative ){
 
-		// return [ this.timeStart, this.keys ]
-
-		return this.keys
+		const scope = this
+		let out = ''
+		out += '\n'+ this._label
+		out += '\n'+ new Array( this._label.length ).fill( '─' ).join( '' )
+		out += this.keys
 		.reduce( function( output, key ){
 
+			output += '\n'
+			output += useRelative === true && isUsefulNumber( key.timeRelative )
+				? ' +'+ key.timeRelative 
+				: '  '+ key.timeAbsolute
+			output += scope._units +'  '
+			if( isUsefulString( key.label )) output += key.label +'  ' 
+			output += JSON.stringify( key.values )
+			return output
 
-			return output +'\n'+ key.timeAbsolute +' '+ JSON.stringify( key.values )
+		}, '' )
 
-		}, '\n'+ this._label )
+
+		//  Should add things like timeCursor, total n, etc.
+
+		return out +'\n\n'
 	}
 	getFirstKey(){
 
@@ -192,7 +208,7 @@ class Pacer {
 		this.setTimeBounds()
 		return this
 	}
-	key( time, values, isAbsolute ){
+	key( time, values, callback, isAbsolute ){
 
 		if( isAbsolute !== true &&//  Making a theoretical `isRelative` the default for backwards compatibility.
 			this.keys.length > 0 ){
@@ -200,44 +216,74 @@ class Pacer {
 			time += this.getLastKey().timeAbsolute
 		}
 		if( this.keys.length === 0 ) this.values = values
-		const key = new Key( time, values )
+		const key = new Key( time, values, callback )
 		this.lastTouchedKey = key
 		this.keys.push( key )
 		this.sortKeys()
 		if( this.keys.length === 1 ) this.timeCursor = this.timeStart - 1
 		return this
 	}
-	rel( timeRelative, values ){
+	rel( timeRelative, values, callback ){
 
-		return this.key( timeRelative, values, false )
+		return this.key( timeRelative, values, callback, false )
 	}
-	abs( timeAbsolute, values ){
+	abs( timeAbsolute, values, callback ){
 
-		return this.key( timeAbsolute, values, true )
+		return this.key( timeAbsolute, values, callback, true )
+	}
+
+
+	labelPacer( s ){
+
+		this._label = s
+		return this
+	}
+	label( s ){
+
+		this.lastTouchedKey.label = s
+		return this
+	}
+	values( v ){
+
+		this.lastTouchedKey.values = v
+		return this
 	}
 	tween( fn ){
 
 		this.lastTouchedKey.tween = fn
 		return this
 	}
-	label( x ){
+	clamp(){
 
-		this.lastTouchedKey.label = x
+		this.isClamped = true
 		return this
 	}
+	unclamp(){
+
+
+		this.isClamped = false
+		return this
+	}
+	units( u ){
+
+		this._units = u
+		return this
+	}
+
+
 	onKey( fn ){
 
-		this.lastTouchedKey._onKey = fn
+		this.lastTouchedKey.onKey = fn
 		return this
 	}
 	onTween( fn ){
 
-		this.lastTouchedKey._onTween = fn
+		this.lastTouchedKey.onTween = fn
 		return this
 	}
 	onCancel( fn ){
 
-		this.lastTouchedKey._onCancel = fn
+		this.lastTouchedKey.onCancel = fn
 		return this
 	}
 
@@ -415,9 +461,9 @@ class Pacer {
 				if( tempKey instanceof Key &&
 					tempKey.guarantee === true ){
 
-					if( typeof tempKey._onKey === 'function' ){
+					if( typeof tempKey.onKey === 'function' ){
 
-						tempKey._onKey( tempKey.values, this )
+						tempKey.onKey( tempKey.values, this )
 					}
 					if( typeof this._onEveryKey === 'function' ){
 
@@ -440,9 +486,9 @@ class Pacer {
 				if( tempKey instanceof Key &&
 					tempKey.guarantee === true ){
 
-					if( typeof tempKey._onKey === 'function' ){
+					if( typeof tempKey.onKey === 'function' ){
 
-						tempKey._onKey( tempKey.values, this )
+						tempKey.onKey( tempKey.values, this )
 					}
 					if( typeof this._onEveryKey === 'function' ){
 

@@ -21,7 +21,7 @@ Getting you from A to B since 2025.
 
 ##  TL;DR
 
-__Pacer__ is a light-weight keyframing toolkit inspired by [Soledad Penadés](https://soledadpenades.com/)’ original [tween.js](https://soledadpenades.com/projects/tween-js/) masterpiece. List your keyframes as time / value pairs, and __Pacer__ will ✨ tween your numbers and 📞 call your callbacks. __It’s minimal__. Only does what it needs to. __It’s reliable__. We use this in our own professional projects. We found the bumps and sanded them down so you won’t have to ✔️ Either include the `Pacer.js` ES6 module in your codebase, or install the Node package:
+__Pacer__ is a light-weight keyframing toolkit inspired by [Soledad Penadés](https://soledadpenades.com/)’ original [tween.js](https://soledadpenades.com/projects/tween-js/) masterpiece. List your keyframes as time / value pairs, and __Pacer__ will ✨ tween your numbers and 📞 call your callbacks. __It’s minimal__. Only does what it needs to. __It’s reliable__. We use this in our own professional projects. We found the bumps and sanded them down so you won’t have to ✔️ Either include the `Pacer.js` ES6 module in your codebase, or install the [Node package](https://www.npmjs.com/package/pacer-js):
 
 ```shell
 npm install pacer-js
@@ -367,7 +367,11 @@ As you’d hope, __Pacer__ will also call `onEveryKey` when it honors `onKey` fo
 
 ###  Outside the box
 
-What happens outside of your declared keyframes? __Pacer__ automatically extrapolates your first and last tweens forward and backward in time, beyond your declared keyframes. You often don’t need this—but when you do, you do. Let’s say you have two keyframes, __A__ at time __0__, and __B__ at time __2__. They’re tweening a value, `n`, from `0` to `1` using the default linear interpolation easing function. As a result you can see that at time __1__, the tweened value of `n` will be `0.5`—halfway between its keyframed values of `0` and `1`. So far so good?
+What happens outside of your declared keyframes? Nothing. Until you do this with your __Pacer__ instance:
+```javascript
+p.unclamp()
+```
+When your __Pacer__ instance is unclamped, it will automatically extrapolate your first and last tweens forward and backward in time, beyond your declared timeline of keyframes. You often don’t need this—but when you do, you do. Let’s say you have two keyframes, __A__ at time __0__, and __B__ at time __2__. They’re tweening a value, `n`, from `0` to `1` using the default linear interpolation easing function. As a result you can see that at time __1__, the tweened value of `n` will be `0.5`—halfway between its keyframed values of `0` and `1`. So far so good?
 
 
 ```
@@ -440,11 +444,31 @@ Let’s cram in a bunch of different feature highlights into this one verbose ex
 
 ```javascript
 //  We’ll start off with the basics.
+
 //  Did you know you can label a Pacer instance
 //  by passing it a String?
 //  That’s useful for debugging later.
 
-var p = new Pacer( 'My first Pacer' )
+//  We can also optionally declare our time unit.
+//  Let’s use “s” for “seconds.”
+
+var p = new Pacer( 'My first Pacer', 's' )
+
+
+//  Actually, I lied.
+//  This is my SECOND Pacer instance ever.
+//  Let’s correct that:
+
+.labelPacer( 'My SECOND Pacer' )
+
+
+//  And, oops--we’re using milliseconds.
+//  Either way would be fine, 
+//  as Pacer doesn’t care what units you use.
+//  This is more for inspection / debugging,
+//  and human reasoning around more complex Pacers.
+
+.units( 'ms' )
 
 
 //  Three keyframes, alike in dignity.
@@ -466,13 +490,13 @@ var p = new Pacer( 'My first Pacer' )
 //  Now let’s have some fun with tweening.
 
 .key( 2000, { n: 300 })
-.label( 'My first tween!' )
+.label( 'My first tween begins!' )
 .tween( Pacer.sine.in )
 .onKey(( e, p )=> console.log( p.getCurrentKey().label ))
 .onTween(( e )=> console.log( 'Tweened value:', e.n ))
 
 .key( 2000, { n: 400 })
-.label( 'My second tween' )
+.label( 'My second tween begins.' )
 .tween( Pacer.quadratic.out )
 .onKey(( e, p )=> console.log( p.getCurrentKey().label ))
 .onTween(( e )=> console.log( 'Tweened value:', e.n ))
@@ -492,12 +516,33 @@ var p = new Pacer( 'My first Pacer' )
 ))
 
 
-//  Can haz multiple tweens at once?
+//  Can haz multiple tweened values at once?
 //  Of course you can!
 
 .key( 2000, { n: 600, x: 100 })
 .onTween(( e )=> console.log( e.n, e.x ))
 .key( 2000, { n: 700, x: -100 })
+
+
+//  Let’s look at some keyframe declaration variations.
+
+.key( 
+	
+	2000, 
+	{ n: 800 }, 
+	( e, p )=> console.log(
+
+		'💫 Did you know, '+
+		'you can actually specify an onKey callback '+
+		'right in the keyframe declaration itself?'
+	)
+)
+.key( 2000 )
+.values({ n: 900 })
+.onKey(( e, p )=> console.log(
+
+	'Or keep each argument entirely separate.'
+))
 
 
 //  Totally commenting these out
@@ -516,7 +561,24 @@ var p = new Pacer( 'My first Pacer' )
 })
 
 
-//  Note that for “before” `keyIndex` will be 
+//  Pacers are “clamped” by default,
+//  ie. their values do not extend to before their first keyframe
+//  or extend beyond their final keyframe.
+//  Because we’re already clamped, this will do nothing:
+
+.clamp()
+
+
+//  But what if we wanted to take our keyframes and tweens
+//  at either end of the timeline
+//  and extend them outward to infinity?
+//  We’d better unclamp!
+
+.unclamp()
+
+
+//  Now we can have steps beyond our timeline.
+//  Note that for our “before” `keyIndex` will be 
 // “out of bounds” with a value of -1,
 //  so `getCurrentKey()` will return undefined.
 //  This is intended. We’re out of keyframes!
