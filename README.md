@@ -1,18 +1,8 @@
-```javascript
+<img src="./pacer.svg?raw=true" width="100%" style="border-radius: 12px;">  
 
+<br>
 
-
-///////     //     //////   ///////  ///////
-//    //   ////   //    //  //       //    //
-//    //  //  //  //        //////   //    //
-///////  ///////  //    //  //       ///////
-//      //     //  //////   ///////  //   //
-//                                   //    //
-//                                          //
-
-
-```
-Getting you from A to B since 2025.
+Driving you from A to B since 2025.  
 
 <br>
 
@@ -26,7 +16,7 @@ __Pacer__ is a light-weight keyframing toolkit inspired by [Soledad Penadés](ht
 ```shell
 npm install pacer-js
 ```
-Now you’re cooking.
+Now you’re cooking 🔥
 
 ```javascript
 import Pacer from 'pacer-js'
@@ -62,23 +52,35 @@ p.update()
 
 With all the tweening and keyframing libraries already out there, why build a new one? Well, we write _a lot_ of JavaScript and we have _strong opinions_ about the libraries we use and the code we write. Sometimes that drives us to rip it all up and start afresh. Here are some aspects we gave particular attention to:
 
-1. [Legible code](#legible-code)  
-2. [Function chaining](#function-chaining)  
-3. [Relative _and_ absolute timestamps](#relative-and-absolute-timestamps)  
-4. [Tweening](#tweening)  
-5. [Every key, every tween](#every-key-every-tween)  
-6. [Access within callbacks](#access-within-callbacks)  
-7. [Update all instances at once](#update-all-instances-at-once)  
-8. [Updating time](#updating-time)  
-9. [Forward _and_ backward](#forward-and-backward)  
-10. [Reduce, reuse, recycle](#reduce-reuse-recycle)  
-11. [Burn it to the ground](#burn-it-to-the-ground)  
-12. [__Pacer’s__ Keyframe Guarantee™](#guaranteed-keyframe-callbacks)  
-13. [Tweening outside the box](#outside-the-box)  
-14. [A verbose example](#verbose-example)  
+ 1. [Lightweight and _fast_](#lightweight-and-fast)  
+ 2. [Legible code](#legible-code)  
+ 3. [Function chaining](#function-chaining)  
+ 4. [Relative _and_ absolute timestamps](#relative-and-absolute-timestamps)  
+ 5. [Tweening](#tweening)  
+ 6. [Every key, every tween](#every-key-every-tween)  
+ 7. [Access within callbacks](#access-within-callbacks)  
+ 8. [Update all instances at once](#update-all-instances-at-once)  
+ 9. [Updating time](#updating-time)  
+10. [Forward _and_ backward](#forward-and-backward)  
+11. [Reduce, reuse, recycle](#reduce-reuse-recycle)  
+12. [Burn it to the ground](#burn-it-to-the-ground)  
+13. [__Pacer’s__ Keyframe Guarantee™](#guaranteed-keyframe-callbacks)  
+14. [Tweening outside the box](#outside-the-box)  
+
+
+Bonus: [A verbose __Pacer__ example](#verbose-example).  
 
 
 <br>
+
+
+
+
+###  Lightweight and _fast_
+
+__Pacer__ is lightweight. It handles keyframes and the interpolation between those keyframes. That’s it. It does _not_ include CSS or SVG magic—that’s on you. (Crafting some scroll-based animations? Check out [__Scroll Pacer__](https://github.com/stewdio/scroll-pacer-js).) Other animation library APIs are written around composing a _single_ tween between two keyframes. __Pacer__ eats a zillion keyframes for breakfast. It’s like we took a vintage [AMC Pacer](https://en.wikipedia.org/wiki/AMC_Pacer), stripped it down to the atoms, rebuilt it in [graphene](https://en.wikipedia.org/wiki/Graphene), and strapped a [J58](https://en.wikipedia.org/wiki/Pratt_%26_Whitney_J58) to it for laughs. Light. Fast. 
+
+
 
 
 ###  Legible code
@@ -431,9 +433,8 @@ if keyIndex === keys.length → onAfterAll()
 
 
 
-<br><br>
+<br><br><br>
 <hr>
-<br><br>
 
 
 
