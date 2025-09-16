@@ -8,7 +8,7 @@
 
 ##  TL;DR
 
-__Pacer__ is a light-weight keyframing toolkit inspired by [Soledad Penadés](https://soledadpenades.com/)’ original [tween.js](https://soledadpenades.com/projects/tween-js/) masterpiece. List your keyframes as time / value pairs, and __Pacer__ will ✨ tween your numbers and 📞 call your callbacks. __It’s minimal__. Only does what it needs to. __It’s reliable__. We use this in our own professional projects. We found the bumps and sanded them down so you won’t have to ✅ Either include the `Pacer.js` ES6 module in your codebase, or install the [Node package](https://www.npmjs.com/package/pacer-js):
+__Pacer__ is a light-weight keyframing toolkit inspired by [Soledad Penadés](https://soledadpenades.com/)’ original [tween.js](https://soledadpenades.com/projects/tween-js/) masterpiece. List your keyframes as time / value pairs, and __Pacer__ will ✨ tween your numbers and 📞 call your callbacks. __It’s minimal__. Only does what it needs to. __It’s reliable__. We use this in our own professional projects. We found the bumps and sanded them down ✅ (so you won’t have to). Either include the `Pacer.js` ES6 module in your codebase, or install the [Node package](https://www.npmjs.com/package/pacer-js):
 
 ```shell
 npm install pacer-js
@@ -49,7 +49,7 @@ That’s it. You’re good to go 👍
 
 ##  Pacer features
 
-With all the tweening and keyframing libraries already out there, why build a new one? Well, we write _a lot_ of JavaScript and we have _strong opinions_ about the libraries we use and the code we write. Sometimes that drives us to rip it all up and start afresh. Here are some aspects we gave particular attention to:
+__Q__: With all the tweening and keyframing libraries already out there, why build a new one? __A__: We write _a lot_ of JavaScript and we have _strong opinions_ about the libraries we use and the code we write. Sometimes that drives us to rip it all up and start afresh. Here are some aspects we gave particular attention to:
 
  1. [Lightweight and _fast_](#lightweight-and-fast)  
  2. [Legible code](#legible-code)  
