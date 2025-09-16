@@ -8,7 +8,7 @@
 
 ##  TL;DR
 
-__Pacer__ is a light-weight keyframing toolkit inspired by [Soledad Penadés](https://soledadpenades.com/)’ original [tween.js](https://soledadpenades.com/projects/tween-js/) masterpiece. List your keyframes as time / value pairs, and __Pacer__ will ✨ tween your numbers and 📞 call your callbacks. __It’s minimal__. Only does what it needs to. __It’s reliable__. We use this in our own professional projects. We found the bumps and sanded them down so you won’t have to 👍 Either include the `Pacer.js` ES6 module in your codebase, or install the [Node package](https://www.npmjs.com/package/pacer-js):
+__Pacer__ is a light-weight keyframing toolkit inspired by [Soledad Penadés](https://soledadpenades.com/)’ original [tween.js](https://soledadpenades.com/projects/tween-js/) masterpiece. List your keyframes as time / value pairs, and __Pacer__ will ✨ tween your numbers and 📞 call your callbacks. __It’s minimal__. Only does what it needs to. __It’s reliable__. We use this in our own professional projects. We found the bumps and sanded them down so you won’t have to ✅ Either include the `Pacer.js` ES6 module in your codebase, or install the [Node package](https://www.npmjs.com/package/pacer-js):
 
 ```shell
 npm install pacer-js
@@ -37,6 +37,8 @@ Stick this in your animation loop 💫
 ```javascript
 p.update()
 ```
+That’s it. You’re good to go 👍
+
 
 
 
