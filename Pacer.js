@@ -243,11 +243,11 @@ class Pacer {
 		this.lastTouchedKey.label = s
 		return this
 	}
-	values( v ){
+	// values( v ){
 
-		this.lastTouchedKey.values = v
-		return this
-	}
+	// 	this.lastTouchedKey.values = v
+	// 	return this
+	// }
 	tween( fn ){
 
 		this.lastTouchedKey.tween = fn

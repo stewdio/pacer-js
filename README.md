@@ -620,27 +620,6 @@ var p = new Pacer( 'My first Pacer', 's' )
 .key( 2000, { n: 700, x: -100 })
 
 
-//  Let’s look at some keyframe declaration variations.
-
-.key( 
-	
-	2000, 
-	{ n: 800 }, 
-	( e, p )=> console.log(
-
-		'💫 Did you know, '+
-		'you can actually specify an onKey callback '+
-		'right in the keyframe declaration itself?'
-	)
-)
-.key( 2000 )
-.values({ n: 900 })
-.onKey(( e, p )=> console.log(
-
-	'Or keep each argument entirely separate.'
-))
-
-
 //  Totally commenting these out
 //  in case you copy and paste this whole thing
 //  into your console.
