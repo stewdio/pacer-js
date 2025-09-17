@@ -18,7 +18,8 @@ Now you’re cooking 🔥
 ```javascript
 import Pacer from 'pacer-js'
 
-var p = new Pacer()
+
+new Pacer()
 
 .key( Date.now(), { n: 0 })
 .onKey(( e )=> console.log( '1st keyframe', e.n ))
@@ -26,16 +27,16 @@ var p = new Pacer()
 .key( 2000, { n: 1 })
 .onKey(( e )=> console.log( '2 seconds later', e.n ))
 .tween( Pacer.cubic.inOut )
-.onTween(( e )=> console.log( 'Tweened values!', e.n ))
+.onTween(( e )=> console.log( 'Tweened value', e.n ))
 
 .key( 2000, { n: 2 })
 .onKey(( e )=> console.log( '2 more later', e.n ))
 ```
 
-Stick this in your animation loop 💫
+Stick 👇 this 👇 in your animation loop 💫
 
 ```javascript
-p.update()
+Pacer.update()
 ```
 That’s it. You’re good to go 👍
 
@@ -51,38 +52,59 @@ That’s it. You’re good to go 👍
 
 __Q__: With all the tweening and keyframing libraries already out there, why build a new one? __A__: We write _a lot_ of JavaScript and we have _strong opinions_ about the libraries we use and the code we write. Sometimes that drives us to rip it all up and start afresh. Here are some aspects we gave particular attention to:
 
+__Goals and structure__  
+
  1. [Lightweight and _fast_](#lightweight-and-fast)  
  2. [Legible code](#legible-code)  
  3. [Function chaining](#function-chaining)  
+ 
+__Keyframes and tweens__  
+
  4. [Relative _and_ absolute timestamps](#relative-and-absolute-timestamps)  
- 5. [Tweening](#tweening)  
- 6. [Every key, every tween](#every-key-every-tween)  
- 7. [Access within callbacks](#access-within-callbacks)  
- 8. [Update all instances at once](#update-all-instances-at-once)  
- 9. [Updating time](#updating-time)  
-10. [Forward _and_ backward](#forward-and-backward)  
-11. [Reduce, reuse, recycle](#reduce-reuse-recycle)  
-12. [Burn it to the ground](#burn-it-to-the-ground)  
-13. [__Pacer’s__ Keyframe Guarantee™](#guaranteed-keyframe-callbacks)  
-14. [Tweening outside the box](#outside-the-box)  
+ 5. [__Pacer’s__ Keyframe Guarantee™](#guaranteed-keyframe-callbacks)  
+ 6. [Tweens: Between two ~~ferns~~ <ins>keyframes</ins>](#tweening)  
+ 7. [Every key, every tween](#every-key-every-tween)  
+ 8. [Access within callbacks](#access-within-callbacks)  
+ 9. [~~Thinking~~ <ins>Tweening</ins> outside the box](#outside-the-box)  
+
+__Controlling the clock__  
+
+10. [Update all instances at once](#update-all-instances-at-once)  
+11. [Update a specific instance](#update-a-specific-instance)
+12. [Update to a specific time](#update-to-a-specific-time)  
+13. [Forward _and_ backward](#forward-and-backward)  
+
+__Keeping tidy__  
+
+14. [Looping animations (“Reduce, reuse, recycle”)](#looping-animations)  
+15. [Burn it to the ground](#burn-it-to-the-ground)  
 
 
-Bonus: [A verbose __Pacer__ example](#verbose-example).  
 
 
-<br>
+__Bonus__: [A verbose __Pacer__ example](#verbose-example).  
 
 
 
 
-###  Lightweight and _fast_
+<br><br>
+
+
+
+
+###  Goals and structure
+
+
+
+
+####  Lightweight and _fast_
 
 __Pacer__ is lightweight. It handles keyframes and the interpolation between those keyframes. That’s it. It does _not_ include CSS or SVG magic—that’s on you. (Crafting some scroll-based animations? Check out [__Scroll Pacer__](https://github.com/stewdio/scroll-pacer-js).) Other animation library APIs are written around composing a _single_ tween between two keyframes. __Pacer__ eats a zillion keyframes for breakfast. It’s like we took a vintage [AMC Pacer](https://en.wikipedia.org/wiki/AMC_Pacer), stripped it down to the atoms, rebuilt it in [graphene](https://en.wikipedia.org/wiki/Graphene), and strapped a [J58](https://en.wikipedia.org/wiki/Pratt_%26_Whitney_J58) to it for laughs. Light. Fast. 
 
 
 
 
-###  Legible code
+####  Legible code
 
 Your __Pacer__ code says what it does. We wanted it to read like a short story. Animating is hard enough. It’s an iterative process that requires making, testing, and then _remaking._ You shouldn’t have to spend half your energy on deciphering your own code just to track down where that one keyframe is that you’re aiming to edit. 
 
@@ -91,45 +113,50 @@ We did shorten some words, like “keyframe” → `key` and “between” → `
 
 
 
-###  Function chaining
+####  Function chaining
 
 Expanding on the above, a code block should read like a normal paragraph of text—one idea following another in a logical sequence. With __Pacer__ you declare a keyframe, and [chain](https://en.wikipedia.org/wiki/Method_chaining) another right onto it. Perhaps you add an `onTween` callback _between_ those keyframes. Just about every __Pacer__ method returns its own instance, so you can chain from one method to another, to another—like writing the sentences of a short story. 
 
 
 
 
-###  Relative _and_ absolute timestamps
+<br><br>
+
+
+
+
+###  Keyframes and tweens
+
+
+
+
+####  Relative _and_ absolute timestamps
 
 By default, keyframes are specificed by _relative_ time. (“Do this two seconds after that last keyframe.”) This makes it trivial to swap pieces of an animation around—just cut and paste—without having to redo all the keyframe timings. Our TL;DR example uses the `key` command to illustrate this workflow, but we could have also used the slightly more descriptive `rel` (“relative”) alias to accomplish the exact same thing. All relative times are relative to the chronologically-latest keyframe as determined the moment the `key` or `rel` command is processed. (And yes, you can specify a _negative_ relative time—if you’re into that sort of thing.) What about your _first_ keyframe—which has no prior keyframe to be relative to? Consider it relative to _zero_—which makes it both relative _and_ absolute. Note the use of the alias `rel` here rather than `key`:
 
 ```javascript
-var 
-now = Date.now(),
-p = new Pacer()
+var now = Date.now()
 
+new Pacer()
 .rel( now )
 .onKey(()=> console.log( '1st keyframe' ))
-
 .rel( 2000 )
 .onKey(()=> console.log( '3rd keyframe' ))
-
 .rel( -1000 )
 .onKey(()=> console.log( '2nd keyframe' ))
 ```
 
-Meanwhile, specifying an absolute time for your keyframe is as easy as using the `abs` command instead of `key` or `rel`. Immediately after your new keyframe has been created, all keyframes are re-sorted in chronological order; ready for your next command. 
+Specifying an absolute time for your keyframe is as easy as using the `abs` command instead of `key` or `rel`. 
+
 
 ```javascript
-var 
-now = Date.now(),
-p = new Pacer()
+var now = Date.now()
 
+new Pacer()
 .abs( now )
 .onKey(()=> console.log( '1st keyframe' ))
-
 .abs( now + 2000 )
 .onKey(()=> console.log( '3rd keyframe' ))
-
 .abs( now + 1000 )
 .onKey(()=> console.log( '2nd keyframe' ))
 ```
@@ -137,29 +164,50 @@ p = new Pacer()
 Mix and match `key`, `rel`, and `abs` if it makes you smile.
 
 ```javascript
-var 
-now = Date.now(),
-p = new Pacer()
+var now = Date.now()
 
+new Pacer()
 .key( now )
 .onKey(()=> console.log( '1st keyframe' ))
-
 .rel( 2000 )
 .onKey(()=> console.log( '3rd keyframe' ))
-
 .abs( now + 1000 )
 .onKey(()=> console.log( '2nd keyframe' ))
 ```
 
+When you create a keyframe, it is added to your instance’s `keys` array, and that array of keyframes is then sorted in chronological order according to each keyframe’s absolute time. Meanwhile, your instance also keeps track of the last keyframe you have “touched” via a `lastTouchedKey` property, so that subsequent commands like `onKey` or `tween` always refer to that last mentioned keyframe. 
 
 
 
-###  Tweening
+
+####  Guaranteed keyframe callbacks
+
+We pledge to deliver all of your `onKey` callbacks with a money-back guarantee. (Reminder: You have paid zero dollars for this toolkit. And donations don’t count.) By default, each keyframe has a `guarantee` Boolean set to `true` that assures `onKey` will be called when calculating the gulf between “now” and our animation loop’s prior execution. Let’s say you have keyframes spaced very close together in time—tighter than your animation loop is able to execute. In this example, our last `update` call determined that we were between Key Frame __A__ and Key Frame __B__: 
+
+```
+ KEY       KEY       KEY       KEY
+FRAME     FRAME     FRAME     FRAME
+  A         B         C         D
+
+┄┄┼─────────┼─────────┼─────────┼┄┄
+
+prior  ↑
+update │            this   ↑
+                    update │
+```
+However, on this current call to `update`, we have not merely reached Key Frame __B__, but have passed both it and Key Frame __C__ to arrive between __C__ and __D__. __Pacer__ ensures that if `onKey` callbacks exist for __B__ and __C__ they will be honored—and in order. Flowing backward through time? Sleep tight knowing they’ll be called in an order that respects your flow of time, eg. __C__ _then_ __B__ when flowing backward. That’s the __Pacer__ Keyframe Guarantee™.
+
+As you’d hope, __Pacer__ will also call `onEveryKey` when it honors `onKey` for __B__ and __C__. (Note that `onTween` and `onEveryTween` will _not_ be called for any values between __B__ and __C__ as we are not experiencing time between those keyframes.) 
+
+
+
+
+####  Tweening
 
 By default your values are [linear interpolated](https://en.wikipedia.org/wiki/Linear_interpolation) (“lerped”) between keyframes. If you’re reading this and evaluating if __Pacer__ is the right solution for you, then I’m sure I don’t have to explain the importance of easing equations. We have the goods. Use `tween()` to pick from our built-in easing equations, and `onTween()` to register a callback function that will execute on each `update()` call that lands between your specified keyframes. Check how easy it is:
 
 ```javascript
-var p = new Pacer()
+new Pacer()
 
 .key( Date.now(), { n: 0 })
 .onKey(  ( e )=> console.log( 'KEY 1:', e.n ))
@@ -191,13 +239,13 @@ Each easing equation includes its `in`, `out`, and `inOut` variants, eg. `Pacer.
 
 
 
-###  Every key, every tween
+####  Every key, every tween
 
 If you find you’re running the same callback over and over, perhaps you’d prefer to declare that just once? We’ve got you covered. Use `onEveryKey` to declare a callback that will fire on _every_ keyframe, and `onEveryTween` to do the same for all tweens. [Something borrowed, something blue. Every tween callback for you](https://youtu.be/4YR_Mft7yIM).  
 
 
 ```javascript
-var p = new Pacer()
+new Pacer()
 .key( Date.now(), { n: 0 })
 .key( 1000, { n: 100 })
 .key( 1000, { n: 200 })
@@ -208,12 +256,12 @@ var p = new Pacer()
 
 
 
-###  Access within callbacks
+####  Access within callbacks
 
 __Pacer__’s `onKey` and `onTween` methods provide a reference to its own instance as a callback argument. The instance includes potentially useful properties, like `keyIndex` which tells you which keyframe in the sequence you are currently on.
 
 ```javascript
-var p = new Pacer()
+new Pacer()
 .key( Date.now() )
 .key( 1000 )
 .key( 1000 )
@@ -229,22 +277,7 @@ var p = new Pacer()
 ))
 ```
 
-This means in theory you don’t even have to name your __Pacer__ instance if all you want to do is reference that instance within your callbacks. Note the lack of assignment here:
-
-
-```javascript
-new Pacer()
-.key( Date.now() )
-.key( 1000 )
-.key( 1000 )
-.onEveryKey(( e, p )=> console.log( 
-	
-	'Step #', p.keyIndex + 1, 
-	'of', p.keys.length
-))
-```
-
-And because `onKey` and `onTween` provide the same callback arguments, it’s trivial to use the same callback for both.
+And because `onKey` and `onTween` provide the same callback arguments, it’s trivial to use the same callback for both. (Note that `e.n` is the normalized progress between keyframes.)
 
 ```javascript
 var myCallback = ( e, p )=> console.log( 
@@ -260,113 +293,26 @@ new Pacer()
 .onEveryTween( myCallback )
 ```
 
+You can even check on the overall progress of your __Pacer__ instance, ie. What percentage of this instance’s keyframed duration has been completed? (Note the difference between `e.n` and `p.n`. The former is the progress between the current keyframe and the next one, while the latter describes progress across all keyframes.)
 
-
-
-###  Update all instances at once
-
-But how do you update an _unnamed_ instance? Under the hood, __Pacer__ keeps a reference to all created instances in its `Pacer.all` array. You can update every single instance at once by sticking this in your animation loop:
 
 ```javascript
-Pacer.update()
+var myCallback = ( e, p )=> console.log( 
+
+	'Pacer progress: '+ Math.round( p.n * 100 ) +'%'
+)
+new Pacer()
+.key( Date.now(), { n: 0 })
+.key( 1000, { n: 100 })
+.key( 1000, { n: 200 })
+.onEveryKey(   myCallback )
+.onEveryTween( myCallback )
 ```
 
 
 
 
-###  Updating time
-
-You’ve seen that you can update your instance with `p.update()`, or all instances at once with `Pacer.update()`. But now you’re interested in finer control of your timing. When either the class or instance `update` method is called without arguments, __Pacer__ defaults to `Date.now()`, but you are free to use any numeric progression you choose. Perhaps you want to key off of `window.performance.now()` for finer accuraccy. Or maybe you’re building a scroll-based animation and you’re substituting `scrollY` (pixels) for time. Just pass your value via update:
-
-```javascript
-p.update( numericValue )
-```
-Be sure you’re consistent with your units. __Pacer__ isn’t going to magically understand that you’ve used seconds to declare keyframes, but milliseconds in your `update` call. That’s on you. And don’t use one instance for timed animations, another for scrolling animations, and then expect the global `Pacer.update()` to cater to both. 
-
-Another thing to note is that `update` expects an _absolute_ number, rather than a _relative_ one. (That’s “absolute” as in each number represents a distance from zero, not “absolute value” as in a non-negative number. __Pacer__’s `update` is perfectly happy to accept negative values for time.) Repeatedly calling `p.update( 1000 )` will _not_ advance your animation by one second with each call. Instead it will lock your animation at its absolute one second mark. Relative units are enormously useful for crafting (and recrafting) keyframes, but slightly less useful within the context of synchronization. It’s taken years of building projects like this to be able to feel confident in asserting this subtlety. 
-
-
-
-
-###  Forward _and_ backward
-
-Mathematically, [time can flow both forward _and_ backward](https://en.wikipedia.org/wiki/Tenet_(film)). Why would __Pacer__ ignore that reality? The ability to scrub a timeline back and forth is incredibly valuable, and literally the mechanism that our __ScrollPacer__ toolkit uses for scroll-based animations. (More on this to come.) Rest assured that your `update` call can handle time flowing in either direction (and at any speed). It just works.
-
-
-
-
-###  Enable / disable
-
-Need to gate your __Pacer__ instance? (Let’s assume you’ve named it `p`.) Prevent it from chewing `update` cycles:
-
-```javascript
-p.disable()
-```
-Ready to return to service?
-
-```javascript
-p.enable()
-```
-
-
-
-
-###  Reduce, reuse, recycle
-
-Re-running an animation is easy. The `reset` method recalculates the timing of all of your instance’s keyframes based on the numeric argument provided. (With no arguments, the `reset` method defaults to `Date.now()`.) Here’s an example of taking a previously used animation and restarting it two seconds from now:
-
-```javascript
-p.reset( Date.now() + 2000 )
-```
-
-
-<br>
-
-
-###  Burn it to the ground
-
-Done with your instance for good? (We’re not talking about “pausing” your instance—we’re about to _destroy_ your instance.) Remove all of __Pacer__’s references to it and set the instance to `null` with:
-
-```javascript
-p.remove()
-```
-Or via the class itself:
-
-```javascript
-Pacer.remove( p )
-```
-Seeking total destruction?
-
-```javascript
-Pacer.removeAll()
-```
-
-
-
-
-###  Guaranteed keyframe callbacks
-
-We pledge to deliver all of your `onKey` callbacks with a money-back guarantee. (Reminder: You have paid zero dollars for this toolkit.And donations don’t count.) By default, each keyframe has a `guarantee` Boolean set to `true` that assures `onKey` will be called when calculating the gulf between “now” and our animation loop’s prior execution. Let’s say you have keyframes spaced very close together in time—tighter than your animation loop is able to execute. In this example, our last `update` call determined that we were between Key Frame __A__ and Key Frame __B__: 
-
-```
- KEY       KEY       KEY       KEY
-FRAME     FRAME     FRAME     FRAME
-  A         B         C         D
-
-┄┄┼─────────┼─────────┼─────────┼┄┄
-
-prior  ↑
-update │            this   ↑
-                    update │
-```
-However, on this current call to `update`, we have not merely reached Key Frame __B__, but have passed both it and Key Frame __C__ to arrive between __C__ and __D__. __Pacer__ ensures that if `onKey` callbacks exist for __B__ and __C__ they will be honored—and in order. Flowing backward through time? Sleep tight knowing they’ll be called in an order that respects your flow of time, eg. __C__ _then_ __B__ when flowing backward. That’s the __Pacer__ Keyframe Guarantee™.
-
-As you’d hope, __Pacer__ will also call `onEveryKey` when it honors `onKey` for __B__ and __C__. Note that `onTween` and `onEveryTween` will _not_ be called for any values between __B__ and __C__ as we are not experiencing time between those keyframes. 
-
-
-
-
-###  Outside the box
+####  Outside the box
 
 What happens outside of your declared keyframes? Nothing. Until you do this with your __Pacer__ instance:
 ```javascript
@@ -386,12 +332,12 @@ t             0         1         2
 n            0.0       0.5       1.0       
 ```
 
-But what if we wanted to know the tweened value of `n` beyond the specified keyframes? What if we want to know `n` at time __-1__? Or at time __3__? __Pacer__ extends the value of `n` infinitely outward on either side of the timeline using the existing tweening functions on either end of the keyframe sequence. In this simple case we’re using the default linear interpolation on both ends, so it’s trivial to see that at time __-1__ `n` ought to be `-0.5`. This is consistent with its declared trajectory between time __0__ and __1__—or __0__ and __2__, for that matter. Similarly, at time __3__, `n` will be `1.5`.
+But what if we wanted to know the tweened value of `n` beyond the specified keyframes? What if we want to know `n` at time __-1__? Or at time __3__? __Pacer__ extends the value of `n` infinitely outward on either side of the timeline using the existing tweening functions on either end of the keyframe sequence. In this simple case we’re using the default linear interpolation on both ends, so it’s trivial to see that at time __-1__, `n` ought to be `-0.5`. This is consistent with its declared trajectory between time __0__ and __1__—or __0__ and __2__, for that matter. Similarly, at time __3__, the extrapolated value of `n` will be `1.5`.
 
 ```
              KEY                 KEY
             FRAME               FRAME
-              A                   B
+unclamped     A                   B     unclamped
 
    ┄┼┄┄┄┄┄┄┄┄┄╞═════════╪═════════╡┄┄┄┄┄┄┄┄┄┼┄
 t  -1         0         1         2         3
@@ -399,35 +345,185 @@ t  -1         0         1         2         3
 n -0.5       0.0       0.5       1.0       1.5
 ```
 
-Because these times exist beyond our declared keyframes, `onEveryTween` will _not_ fire. (Just imagine how annoying that would become—requiring you to gate all of your `onEveryTween` callbacks based on whether or not the current time was actually within your expected range.) So how do we make use of this tween extrapolation? Here’s an example pre-history callback:
+Because these times exist beyond our declared keyframes, `onEveryTween()` will _not_ fire. Instead use `onBeforeAll()` and `onAfterAll()`. Here’s a pre-frames example:
 
 ```javascript
 p.onBeforeAll(( e, p )=> console.log(
 
-	'Pre-history value:', e.n,
+	'Pre-frames value: ', e.n,
 	'Current key index:', p.keyIndex,
 	'Current keyframe: ', p.getCurrentKey()
 ))
 ```
-And here’s the post-history complement:
+And here’s the post-frames complement:
 
 ```javascript
 p.onAfterAll(( e, p )=> console.log(
 
-	'Post-history value:', e.n,
-	'Current key index: ', p.keyIndex,
-	'Current keyframe:  ', p.getCurrentKey()
+	'Post-frames value:', e.n,
+	'Current key index:', p.keyIndex,
+	'Current keyframe: ', p.getCurrentKey()
 ))
 ```
+
 Note that for both of these, `p.keyIndex` will be _out of range_ of `p.keys` (`-1` and `keys.length`, respectively.) Consequently, `p.getCurrentKey()` will return `undefined`. This is expected behavior—you are beyond the timeline of the keyframes, after all. Here’s some pseudocode for additional clarity:
 
 ```
 if keyIndex === -1 → onBeforeAll()
 
-if keyIndex 0..keys.length-1 → onEveryTween()
+if keyIndex >= 0 and <= keys.length-1 → onEveryTween()
 
 if keyIndex === keys.length → onAfterAll()
 ```
+
+The combination of using these separate tween callbacks (`onBeforeAll` and `onAfterAll`) alongside `clamp()` and `unclamp()` allows us to cleanly separate animation logic for “outside the box” from whether or not that logic should use clamped or extrapolated values. Should you choose to, you can keep your values clamped, but use `onBeforeAll` and `onAfterAll` to the following effect:
+
+
+```
+             KEY                 KEY
+            FRAME               FRAME
+ clamped      A                   B      clamped
+
+   ┄┼┄┄┄┄┄┄┄┄┄╞═════════╪═════════╡┄┄┄┄┄┄┄┄┄┼┄
+t  -1         0         1         2         3
+
+n  0.0       0.0       0.5       1.0       1.0
+```
+
+
+
+
+<br><br>
+
+
+
+
+###  Controlling the clock
+
+
+
+
+####  Update all instances at once
+
+So far our examples have used _unnamed_ instances of __Pacer__, like so:
+```javascript
+new Pacer()
+```
+
+And our animation loop has used 
+
+```javascript
+Pacer.update()
+```
+to update every single instance in one single command. This is possible because under the hood, __Pacer__ keeps a reference to all created instances in its static `Pacer.all` array. You call the static `Pacer.update()` and in turn it calls the instance method `update()` on each instance. 
+
+
+
+
+####  Update a specific instance
+
+We can also _name_ our instances through assignment, like this:
+
+```javascript
+var p = new Pacer()
+```
+
+That allows us to update instances on an individual basis. You can use this in your animation loop instead to update only this named `p` instance:
+
+```javascript
+p.update()
+```
+
+
+
+
+####  Update to a specific time
+
+You’ve seen that you can update all instances with `Pacer.update()`, and a specific named instance with something like `p.update()`. But now you’re interested in finer control of your timing, ie. You’re ready to pass your own numeric value to `update`. When either the class or instance `update` method is called without arguments, __Pacer__ defaults to `Date.now()`, but you are free to use any numeric progression you choose. Perhaps you want to key off of `window.performance.now()` for finer accuraccy. Or maybe you’re building a scroll-based animation and you’re substituting `scrollY` (pixels) for time. Just pass your value via update:
+
+```javascript
+Pacer.update( numericValue )
+```
+
+Or for a specific instance (assuming you’ve named it `p`):
+
+
+```javascript
+p.update( numericValue )
+```
+Be sure you’re consistent with your units. __Pacer__ isn’t going to magically understand that you’ve used seconds to declare keyframes, but milliseconds in your `update` call. That’s on you. And don’t use one instance for timed animations, another for scrolling animations, and then expect the global `Pacer.update()` to cater to both. (My advice? If you’re creating instances that use different units, house each unit group in its own array. Then in your animation loop, iterate through each array and call update on its entries with whatever `numericValue` is appropriate for that group.)
+
+
+#####  Update is absolute
+
+Another thing to note is that `update` expects an _absolute_ number, rather than a _relative_ one. (That’s “absolute” as in each number represents a distance from zero, not “absolute value” as in a non-negative number. __Pacer__’s `update` is perfectly happy to accept negative values for time.) Repeatedly calling `p.update( 1000 )` will _not_ advance your animation by one second with each call. Instead it will lock your animation at its absolute one second mark. Relative units are enormously useful for crafting (and recrafting) keyframes, but slightly less useful within the context of synchronization. It’s taken years of building projects like this to be able to feel confident in asserting this subtlety. 
+
+
+
+
+####  Forward _and_ backward
+
+Mathematically, [time can flow both forward _and_ backward](https://en.wikipedia.org/wiki/Tenet_(film)). Why would __Pacer__ ignore that reality? The ability to scrub a timeline back and forth is incredibly valuable, and literally the mechanism that our __ScrollPacer__ toolkit uses for scroll-based animations. (More on this to come.) Rest assured that your `update` call can handle time flowing in either direction (and at any speed). It just works.
+
+
+
+
+####  Enable / disable
+
+Need to gate your __Pacer__ instance? (Let’s again assume you’ve named it `p`.) Prevent it from chewing `update` cycles:
+
+```javascript
+p.disable()
+```
+Ready to return to service?
+
+```javascript
+p.enable()
+```
+
+
+
+
+<br><br>
+
+
+
+
+###  Keeping tidy
+
+
+
+
+####  Looping animations
+
+Want to loop an entire animation sequence as time continues to march forward? There is no need to constantly create new instances. Re-running an animation is easy. The `reset` method recalculates the timing of all of your instance’s keyframes based on the numeric argument provided. (With no arguments, the `reset` method defaults to `Date.now()`.) Here’s an example of taking a previously used animation and restarting it two seconds from now:
+
+```javascript
+p.reset( Date.now() + 2000 )
+```
+
+
+
+
+####  Burn it to the ground
+
+Done with your instance for good? (We’re not talking about “pausing” your instance—we’re about to _destroy_ your instance.) Remove all of __Pacer__’s references to it and set the instance to `null` with:
+
+```javascript
+p.remove()
+```
+Or via the class itself:
+
+```javascript
+Pacer.remove( p )
+```
+Seeking total destruction? (“Of all the gin joints in all the towns in all the world, she walks into mine.”)
+
+```javascript
+Pacer.removeAll()
+```
+
+
 
 
 
@@ -627,20 +723,3 @@ var p = new Pacer( 'My first Pacer', 's' )
 
 
 
-<!--
-
-##  Commands
-
-key
-tween
-rel
-abs
-etc
-
-
-##  Event hooks
-
-onKey
-onTween
-
--->
