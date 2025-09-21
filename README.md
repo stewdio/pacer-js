@@ -1,6 +1,5 @@
 <img src="./pacer.svg?raw=true" width="100%">  
 
-<p align="center" style="text-align: center;">Driving you from A to B since 2025.</p>
 <br>
 
 
