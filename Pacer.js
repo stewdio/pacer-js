@@ -53,11 +53,19 @@ class Pacer {
 	constructor( label, units ){
 		
 		this._label = isUsefulString( label ) ? label : 'Untitled Pacer instance'
-		this._units = isUsefulString( units ) ? units : 'ms'// ms, milliseconds, s, seconds, #, n, norm, normalize, normalized, %, percent
+
+		
+		//  This is purely to help humans reason around their Pacers.
+		//  No particular value is required. 
+		//  All that matters is that YOU, the human, are consisent with your units.
+		//  If you want to make use of this property, some suggested values:
+		//  ms, milliseconds, s, seconds, #, n, norm, normalize, normalized, %, percent
+
+		this._units = isUsefulString( units ) ? units : 'ms'
 
 		this.keys = []
 		this.keyIndex = -1
-		this.lastTouchedKey = null
+		this.lastCreatedKey = null
 		
 		this.values = {}
 		this.n = 0
@@ -72,7 +80,16 @@ class Pacer {
 	
 
 
-	//  Non-chainable.
+
+
+	    ////////////////////////
+	   //                    //
+	  //   Non-chainables   //
+	 //                    //
+	////////////////////////
+
+
+	//  ie. They do not return `this` (your Pacer instance).
 
 	inspect( useRelative ){
 
@@ -120,7 +137,6 @@ class Pacer {
 		//  This logic is unnecessary,
 		//  but leaving it here for future reference.
 
-
 		// const tweenLabel = keyA.tween.label
 		// if( direction < 0 && tweenLabel !== 'linear' ){
 			
@@ -162,7 +178,17 @@ class Pacer {
 
 
 
-	//  Chainable key-focussed methods.
+
+
+	    ////////////////////
+	   //                //
+	  //   Chainables   //
+	 //                //
+	////////////////////
+
+
+	//  ie. They all return `this` (your Pacer instance),
+	//  so you can pipe from one method to another, to another… 
 
 	setTimeBounds(){
 
@@ -182,7 +208,7 @@ class Pacer {
 
 
 			//  Yes, we have to operate directly on the `keys` Array
-			//  rather than `key` element reference
+			//  rather than a `key` element reference
 			//  if we want to actually write this property.
 			//  Otherwise it silently fails. Lovely. 
 			//  And we don’t want to use Array.map 
@@ -194,6 +220,7 @@ class Pacer {
 			//  Also, here’s a nicety:
 			//  if there’s a key with no values,
 			//  let’s just copy the values from the previous key.
+			// (I have some further ideas about this… Stay tuned!)
 
 			if( key.values instanceof Object !== true &&
 				typeof keys[ i - 1 ] !== 'undefined' &&
@@ -201,23 +228,31 @@ class Pacer {
 
 				keys[ i ].values = keys[ i - 1 ].values
 
-				//  There’s an argument to made for this instead of the above:
-				// keys[ i ].values = Object.assign( {}, keys[ i - 1 ].values )
+
+				//  There’s an argument to be made for this instead of the above:
+				//  keys[ i ].values = Object.assign( {}, keys[ i - 1 ].values )
+				//  Remove ability for original object owner to mutate values? Thoughts? 
 			}
 		})
 		this.setTimeBounds()
 		return this
 	}
+
+
+	//  CHAINABLE “Key-based” methods,
+	//  ie. creates or relies on `this.lastCreatedKey`.
+
 	key( time, values, callback, isAbsolute ){
 
 		if( isAbsolute !== true &&//  Making a theoretical `isRelative` the default for backwards compatibility.
 			this.keys.length > 0 ){
 			
-			time += this.getLastKey().timeAbsolute
+			// time += this.getLastKey().timeAbsolute
+			time += this.lastCreatedKey.timeAbsolute//  IT’S TRICKY TO ROCK A RHYME !
 		}
 		if( this.keys.length === 0 ) this.values = values
 		const key = new Key( time, values, callback )
-		this.lastTouchedKey = key
+		this.lastCreatedKey = key
 		this.keys.push( key )
 		this.sortKeys()
 		if( this.keys.length === 1 ) this.timeCursor = this.timeStart - 1
@@ -231,75 +266,49 @@ class Pacer {
 
 		return this.key( timeAbsolute, values, callback, true )
 	}
-
-
-	labelPacer( s ){
-
-		this._label = s
-		return this
-	}
 	label( s ){
 
-		this.lastTouchedKey.label = s
+		this.lastCreatedKey.label = s
 		return this
 	}
+	//  Well this was stupid…
+	//  Need to meditate on best approach for avoiding name collisions between
+	//  1. Regular old instance object properties,
+	//  2. Setters on this Pacer instance,
+	//  3. Setters actually intended for a Key instance.
+	//  Particularly acute when it comes to .label(), for example.
+	// (I don’t love `label` vs `labelPacer`, but will do for now.)
 	// values( v ){
 
-	// 	this.lastTouchedKey.values = v
+	// 	this.lastCreatedKey.values = v
 	// 	return this
 	// }
-	tween( fn ){
-
-		this.lastTouchedKey.tween = fn
-		return this
-	}
-	clamp(){
-
-		this.isClamped = true
-		return this
-	}
-	unclamp(){
-
-
-		this.isClamped = false
-		return this
-	}
-	units( u ){
-
-		this._units = u
-		return this
-	}
-
-
 	onKey( fn ){
 
-		this.lastTouchedKey.onKey = fn
+		this.lastCreatedKey.onKey = fn
+		return this
+	}
+	tween( fn ){
+
+		this.lastCreatedKey.tween = fn
 		return this
 	}
 	onTween( fn ){
 
-		this.lastTouchedKey.onTween = fn
+		this.lastCreatedKey.onTween = fn
 		return this
 	}
 	onCancel( fn ){
 
-		this.lastTouchedKey.onCancel = fn
+		this.lastCreatedKey.onCancel = fn
 		return this
 	}
 
 
-	//  Chainable instance-wide methods.
+	//  CHAINABLE “instance-wide” callback setters,
+	//  ie. These do _not_ rely on `this.lastCreatedKey`
+	//  and set callbacks for the instance to use.
 
-	onBeforeAll( fn ){
-
-		this._onBefore = fn
-		return this
-	}
-	onAfterAll( fn ){
-
-		this._onAfter = fn
-		return this
-	}
 	onEveryKey( fn ){
 
 		this._onEveryKey = fn
@@ -310,33 +319,122 @@ class Pacer {
 		this._onEveryTween = fn
 		return this
 	}
+	onBeforeAll( fn ){
+
+		this._onBefore = fn
+		return this
+	}
+	onAfterAll( fn ){
+
+		this._onAfter = fn
+		return this
+	}
 
 
-	//  Chainable commands.
+	//  CHAINABLE “instance-wide” commands,
+	//  ie. These do _not_ rely on `this.lastCreatedKey`
+	//  and issue simple property setters.
+
+	labelPacer( s ){//  This naming gives me pause.
+
+		this._label = s
+		return this
+	}
+	units( u ){
+
+		this._units = u
+		return this
+	}
+	clamp(){
+
+		this.isClamped = true
+		return this
+	}
+	unclamp(){
+
+		this.isClamped = false
+		return this
+	}
+
+
+	//  A quick way to turn individual instances on/off,
+	//  particuarly convenient if doing bulk updates
+	//  like `Pacer.update()` ← Note that’s the Class method itself,
+	//  not an instance method.
+
+	enable(){
+
+		this.isEnabled = true
+		return this
+	}
+	disable(){
+
+		this.isEnabled = false
+		return this
+	}
+
+
+	//  All those moments will be lost in time, 
+	//  like tears in rain. 
+	//  Time to die.
+
+	remove(){
+		
+		Pacer.remove( this )
+		return this
+	}
+
+
+
+
+	    ////////////////
+	   //            //
+	  //   Update   //
+	 //            //
+	////////////////
+
+	
+	//  Yeah. This one method deserves its own rhombus comment block, 
+	//  because if it were a pickle it would wear a shirt that says
+	// “I’m a big dill.” Pho real.
+	//  See also `onKey` and `onTween` below.
 
 	update( now ){
 
 
 		//  We only need to update
-		//  if we are enabled
-		//  and we have at least one keyframe
-		//    that might have either a values object, 
-		//    an onKey callback,
-		//    or would be included if there’s an onEveryKey callback.
+		//  if our instance is enabled
+		//  and we have at least one keyframe:
+		//    that might have either a values{} object, 
+		//    an onKey() callback,
+		//    or would be included if there’s an onEveryKey() callback.
 
 		if( this.isEnabled !== true ) return this
 		if( this.keys.length < 1 ) return this
 
-		
-		//  So I guess we’re doing this.
+
 		//  What time is it?
-		//  And what direction are we flowing?
+		//  Remember that “time” is just a numeric value…
+		//  You’ll likely use it for time, sure,
+		//  but you could also follow Scroll Pacer’s example
+		//  and instead send pixel values 
+		//  describing an element’s relationship to the viewport.
 
 		if( isNotUsefulNumber( now )) now = Date.now()
-		if( now === this.timeCursor ) return this//  Unlikely for standalone animations, but very likely for scroll animations.
+
+
+		//  The following is unlikely to be true for standalone animations, 
+		//  but very likely for scroll animations.
+
+		if( now === this.timeCursor ) return this
+
+
+		//  If we made it to here, I guess we’re actually doing this.
+		//  So what direction is our time flowing?
+
 		const direction = now < this.timeCursor ? -1 : 1
 
-
+		
 		//  What’s our total N gain for the this entire instance?
 
 		const method = this.isClamped ? normalize01 : normalize
@@ -346,6 +444,7 @@ class Pacer {
 		//  We know our keys are already sorted by time,
 		//  and we’ve previously set the convenience variables
 		// `timeStart` and `timeStop`.
+		// (This sorting happens automagically with every key creation.)
 		
 		//  Note 1: Direction has no effect on the order of
 		//  keyA and keyB, because we always want this to be true:
@@ -354,6 +453,7 @@ class Pacer {
 		
 		//  Note 2: For this step, it is perfectly reasonable
 		//  for keyA or keyB to be undefined. 
+		//  That is a signal itself, not a lack of signal.
 
 		let 
 		targetIndex = 0,
@@ -413,14 +513,13 @@ class Pacer {
 		}
 
 
-		//  Let’s prep for calling onKey --
+		//  Let’s prep for any onKey callbacks;
 		//  You never know what someone’s callbacks
-		//  are going to ask for on this instance!
+		//  are going to ask for on this instance
+		//  so it’s best to be kind and sharing.
 
 		const keyIndexPrior = this.keyIndex
 		this.direction = direction
-
-
 
 
 
@@ -490,6 +589,12 @@ class Pacer {
 
 						tempKey.onKey( tempKey.values, this )
 					}
+
+
+					//  In the future we may wish to distinguish
+					//  between `onEveryKeyEarly` and `onEveryKeyLate`
+					//  in order to allow users finer control.
+
 					if( typeof this._onEveryKey === 'function' ){
 
 						this._onEveryKey( tempKey.values, this )
@@ -503,8 +608,6 @@ class Pacer {
 
 
 
-
-
 		    /////////////////
 		   //             //
 		  //   onTween   //
@@ -512,10 +615,14 @@ class Pacer {
 		/////////////////
 
 
-		//  If we have just keyframed during this update() loop,
-		//  no need to attempt to tween -- in fact that could
-		//  cause an awful stutter or bounce.
-
+		//  It is possible that our `now` is _exactly_ on a 
+		//  keyframe’s intended firing time.
+		//  If that’s the case, isn’t it redundant to tween?
+		//  YES. But the moment we tried removing the ability to 
+		//  fire tween callbacks when it aligned with a keyframe, 
+		//  we ran into unintended logical “gotchas” on the user side.
+		//  If you are incredibly anxious about performance, 
+		//  you may want to give more thought to your callbacks here. 
 
 		//  We need TWO valid keyframes in order to tween anything.
 		//  If we don’t got, we bail now.
@@ -553,19 +660,21 @@ class Pacer {
 
 				keyA._onTween( this.values, this )
 			}
+
+
+			//  In the future we may wish to distinguish
+			//  between `onEveryTweenEarly` and `onEveryTweenLate`
+			//  in order to allow users finer control.
+
 			if( typeof this._onEveryTween === 'function' ){
 
 				this._onEveryTween( this.values, this )
 			}
 		}
-		
-			
 		return this
 	}
-
-
-
-
+	
+	
 	reset( newTimeStartAbsolute ){
 
 		this.disable()
@@ -576,7 +685,11 @@ class Pacer {
 		.forEach( function( key, i, keys ){
 
 			timeCursor += key.timeRelative
-			keys[ i ].timeAbsolute = timeCursor//  Again, see reasoning above for using .forEach rather than .reduce or .map here.
+			
+			
+			//  Again, see reasoning above for using .forEach rather than .reduce or .map here.
+
+			keys[ i ].timeAbsolute = timeCursor
 		})
 		this.setTimeBounds()
 		this.keyIndex   = -1
@@ -586,37 +699,18 @@ class Pacer {
 	}
 
 
-	//  A quick way to turn individual pacers on/off,
-	//  particuarly convenient if doing builk updates
-	//  like Pacer.update() ← Note that’s the Class method itself,
-	//  not an instance method.
-
-	enable(){
-
-		this.isEnabled = true
-		return this
-	}
-	disable(){
-
-		this.isEnabled = false
-		return this
-	}
-
-
-	//  All those moments will be lost in time, 
-	//  like tears in rain. 
-	//  Time to die.
-
-	remove(){
-		
-		Pacer.remove( this )
-		return this
-	}
 
 
 
 
-	//  STATICS: `this === Pacer`
+	    /////////////////
+	   //             //
+	  //   Statics   //
+	 //             //
+	/////////////////
+
+
+	//  ie `this === Pacer`
 
 	static all = []
 	static update( now ){
@@ -665,15 +759,28 @@ class Pacer {
 
 
 
+
+
+    ////////////////
+   //            //
+  //   Easing   //
+ //            //
+////////////////
+
+
 //  Tweening functions, aka Easing functions.
 // “Tween” is of course short for “between”, as in _between_ the keyframes.
-//  We’ll start with our default tween (no easing):
+//  We’ll start with our default tween (no fancy easing):
 
 Pacer.linear = function( n ){ return n }
 Pacer.linear.label = 'linear'
 
 
-//  Look how ’purty these symetric functions are boxed up.
+//  Robert Penner’s collection of easing functions.
+//  https://robertpenner.com/easing/
+//  Look how ’purty I’ve boxed up these symetric functions!
+//  Compare to how much lengthier and complicated this looks:
+//  https://github.com/danro/jquery-easing/blob/master/jquery.easing.js
 //  Down the road we ought to add Bezier() and Custom options.
 
 Object.entries({
@@ -706,6 +813,10 @@ Object.entries({
 	const
 	key = entry[ 0 ],
 	val = entry[ 1 ]
+
+
+	//  Graft our easing logic right onto Pacer
+	//  so it’s trivial to access.
 
 	Pacer[ key ] = {
 

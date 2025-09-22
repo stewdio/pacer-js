@@ -1,13 +1,16 @@
 <img src="./pacer.svg?raw=true" width="100%">  
 
-<br>
+<p align="center" style="text-align: center">
+[![NPM Version][npm-image]][npm-url]
+[![NPM Downloads][downloads-image]][downloads-url]
+</p>
 
 
 
 
 ##  TL;DR
 
-__Pacer__ is a light-weight keyframing toolkit inspired by [Soledad Penadés](https://soledadpenades.com/)’ original [tween.js](https://soledadpenades.com/projects/tween-js/) masterpiece. List your keyframes as time / value pairs, and __Pacer__ will ✨ tween your numbers and 📞 call your callbacks. __It’s minimal__. Only does what it needs to. __It’s reliable__. We use this in our own professional projects. We found the bumps and sanded them down ✅ (so you won’t have to). Either include the `Pacer.js` ES6 module in your codebase, or install the [Node package](https://www.npmjs.com/package/pacer-js):
+__Pacer__ is a light-weight keyframing toolkit inspired by [Soledad Penadés](https://soledadpenades.com/)’ original [tween.js](https://soledadpenades.com/projects/tween-js/) masterpiece. List your keyframes as time / value pairs, and __Pacer__ will ✨ tween your numbers and 📞 call your callbacks. __It’s minimal__. Only does what it needs to. __It’s reliable__. We use this in our own professional projects. We found the bumps and sanded them down ✅ (so you won’t have to). Either include the [`Pacer.js`](./Pacer.js) ES6 module (and its [one dependency](https://github.com/stewdio/shoes-js)) in your codebase, or install the [Node package](https://www.npmjs.com/package/pacer-js):
 
 ```shell
 npm install pacer-js
@@ -42,7 +45,7 @@ That’s it. You’re good to go 👍
 
 
 
-<br><br><br><br>
+<br><br><br>
 
 
 
@@ -131,7 +134,7 @@ Expanding on the above, a code block should read like a normal paragraph of text
 
 ###  Relative _and_ absolute timestamps
 
-By default, keyframes are specificed by _relative_ time. (“Do this two seconds after that last keyframe.”) This makes it trivial to swap pieces of an animation around—just cut and paste—without having to redo all the keyframe timings. Our TL;DR example uses the `key` command to illustrate this workflow, but we could have also used the slightly more descriptive `rel` (“relative”) alias to accomplish the exact same thing. All relative times are relative to the chronologically-latest keyframe as determined the moment the `key` or `rel` command is processed. (And yes, you can specify a _negative_ relative time—if you’re into that sort of thing.) What about your _first_ keyframe—which has no prior keyframe to be relative to? Consider it relative to _zero_—which makes it both relative _and_ absolute. Note the use of the alias `rel` here rather than `key`:
+By default, keyframes are specificed by _relative_ time. (“Do this two seconds after that last keyframe.”) This makes it trivial to swap pieces of an animation around—just cut and paste—without having to redo all the keyframe timings. Our [TL;DR example](#tldr) uses the `key` command to illustrate this workflow, but we could have also used the slightly more descriptive `rel` (“relative”) alias to accomplish the exact same thing. All relative times are relative to the _most recently created keyframe_ as determined the moment the `key` or `rel` command is processed. (And yes, you can specify a _negative_ relative time—if you’re into that sort of thing.) What about your _first_ keyframe—which has no prior keyframe to be relative to? Consider it relative to _zero_—which makes it both relative _and_ absolute. Note the use of the alias `rel` here rather than `key`:
 
 ```javascript
 var now = Date.now()
@@ -174,7 +177,7 @@ new Pacer()
 .onKey(()=> console.log( '2nd keyframe' ))
 ```
 
-When you create a keyframe, it is added to your instance’s `keys` array, and that array of keyframes is then sorted in chronological order according to each keyframe’s absolute time. Meanwhile, your instance also keeps track of the last keyframe you have “touched” via a `lastTouchedKey` property, so that subsequent commands like `onKey` or `tween` always refer to that last mentioned keyframe. 
+When you create a keyframe, it is added to your instance’s `keys` array, and that array of keyframes is then sorted in chronological order according to each keyframe’s absolute time. (This ensures your `keys` array is always tidy.) Meanwhile, your instance also keeps track of the last keyframe you have created via a `lastCreatedKey` property, so that subsequent commands like `onKey` or `tween` always refer to the “intuitively correct” keyframe. Your code reads like a short story.
 
 
 
