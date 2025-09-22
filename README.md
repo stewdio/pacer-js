@@ -1,10 +1,5 @@
 <img src="./pacer.svg?raw=true" width="100%">  
 
-<p align="center" style="text-align: center">
-[![NPM Version][npm-image]][npm-url]
-[![NPM Downloads][downloads-image]][downloads-url]
-</p>
-
 
 
 
