@@ -5,7 +5,7 @@
 
 ##  TL;DR
 
-__Pacer__ is a light-weight keyframing toolkit inspired by [Soledad Penadés](https://soledadpenades.com/)’ original [tween.js](https://soledadpenades.com/projects/tween-js/) masterpiece. List your keyframes as time / value pairs, and __Pacer__ will ✨ tween your numbers and 📞 call your callbacks. __It’s minimal__. Only does what it needs to. __It’s reliable__. We use this in our own professional projects. We found the bumps and sanded them down ✅ (so you won’t have to). Either include the [`Pacer.js`](./Pacer.js) ES6 module (and its [one dependency](https://github.com/stewdio/shoes-js)) in your codebase, or install the [Node package](https://www.npmjs.com/package/pacer-js):
+__Pacer__ is a light-weight keyframing toolkit inspired by [Soledad Penadés](https://soledadpenades.com/)’ original [tween.js](https://soledadpenades.com/projects/tween-js/) masterpiece. List your keyframes as time / value pairs, and __Pacer__ will ✨ tween your numbers and 📞 call your callbacks. __It’s minimal__. Only does what it needs to. __It’s reliable__. We use this in our own professional projects. We found the bumps and sanded them down ✅ (so you won’t have to). Either include the [`Pacer.js`](./Pacer.js) ES6 module (and its [one dependency](https://github.com/stewdio/snacks-js)) in your codebase, or install the [Node package](https://www.npmjs.com/package/pacer-js):
 
 ```shell
 npm install pacer-js
@@ -238,7 +238,7 @@ Each easing equation includes its `in`, `out`, and `inOut` variants, eg. `Pacer.
 
 ###  Every key, every tween
 
-If you find you’re running the same callback over and over, perhaps you’d prefer to declare that just once? We’ve got you covered. Use `onEveryKey` to declare a callback that will fire on _every_ keyframe, and `onEveryTween` to do the same for all tweens. [Something borrowed, something blue. Every tween callback for you](https://youtu.be/4YR_Mft7yIM).  
+If you find you’re running the same callback over and over, perhaps you’d prefer to declare that just once? We’ve got you covered. Use `onEveryKey` to declare a callback that will fire on _every_ keyframe, and `onEveryTween` to do the same for all tweens. [Something borrowed, something blue. Every key and tween for you](https://youtu.be/4YR_Mft7yIM).  
 
 
 ```javascript
@@ -460,7 +460,7 @@ Another thing to note is that `update` expects an _absolute_ number, rather than
 
 ###  Forward _and_ backward
 
-Mathematically, [time can flow both forward _and_ backward](https://en.wikipedia.org/wiki/Tenet_(film)). Why would __Pacer__ ignore that reality? The ability to scrub a timeline back and forth is incredibly valuable, and literally the mechanism that our __ScrollPacer__ toolkit uses for scroll-based animations. (More on this to come.) Rest assured that your `update` call can handle time flowing in either direction (and at any speed). It just works.
+Mathematically, [time can flow both forward _and_ backward](https://en.wikipedia.org/wiki/Tenet_(film)). Why would __Pacer__ ignore that reality? The ability to scrub a timeline back and forth is incredibly valuable, and literally the mechanism that our [__Scroll Pacer__](https://github.com/stewdio/scroll-pacer-js) toolkit uses for scroll-based animations. (More on this to come.) Rest assured that your `update` call can handle time flowing in either direction (and at any speed). It just works.
 
 
 

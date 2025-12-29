@@ -27,7 +27,7 @@ import {
 	normalize01,
 	lerp
 
-} from 'shoes-js'
+} from 'snacks-js'
 
 
 
