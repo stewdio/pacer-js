@@ -1,4 +1,4 @@
-//  Copyright ©️ 2025 Stewart Smith. See LICENSE for details.
+//  Copyright ©️ 2025–2026 Stewart Smith. See LICENSE for details.
 
 
 
@@ -151,9 +151,9 @@ class Pacer {
 		method = this.isClamped ? normalize01 : normalize,
 		n = method(
 
-			now,
 			keyA.timeAbsolute,
-			keyB.timeAbsolute
+			keyB.timeAbsolute,
+			now
 		),
 		a = Object.keys( keyA.values ),
 		b = Object.keys( keyB.values ),
@@ -163,7 +163,7 @@ class Pacer {
 			if( isNotUsefulNumber( a )) return output
 			const b = keyB.values[ key ]	
 			if( isNotUsefulNumber( b )) return output
-			output[ key ] = lerp( tween( n ), a, b )
+			output[ key ] = lerp( a, b, tween( n ))
 			return output
 		
 		}, {})
@@ -215,6 +215,16 @@ class Pacer {
 			//  in case we ever need a DEEP copy of an element’s properties.
 
 			keys[ i ].index = i
+
+
+			//  You know what?
+			//  Let’s also keep track of _relative_ time
+			//  so it’s as easy as pie 
+			//  to shift key times without more overhead. 
+
+			keys[ i ].timeRelative = i === 0 
+				? 0 
+				: key.timeAbsolute - keys[ i - 1 ].timeAbsolute
 
 			
 			//  Also, here’s a nicety:
@@ -438,7 +448,7 @@ class Pacer {
 		//  What’s our total N gain for the this entire instance?
 
 		const method = this.isClamped ? normalize01 : normalize
-		this.n = method( now, this.timeStart, this.timeStop )
+		this.n = method( this.timeStart, this.timeStop, now )
 
 
 		//  We know our keys are already sorted by time,
@@ -846,8 +856,7 @@ Object.entries({
 Pacer.bounce = {
 
 	label: 'bounce',
-	in: n => 1 - val( 1 - n ),
-	out: function( n, n1, d1 ){
+	out: function( n, n1, d1 ){//  Oddly, must be defined before `in` and `inOut`.
 
 		if( isNotUsefulNumber( n1 )) n1 = 7.5625
 		if( isNotUsefulNumber( d1 )) d1 = 2.75
@@ -856,7 +865,10 @@ Pacer.bounce = {
 		else if( n < 2.5 / d1 ) return n1 * ( n -= 2.25 / d1 ) * n + 0.9375
 		else return n1 * ( n -= 2.625 / d1 ) * n + 0.984375
 	},
-	inOut: n => n < 0.5 ? val( n * 2 ) / 2 : val( n * 2 - 1 ) / 2 + 0.5
+	in: n => 1 - Pacer.bounce.out( 1 - n ),
+	inOut: n => n < 0.5 
+		? Pacer.bounce.out( n * 2 ) / 2 
+		: Pacer.bounce.out( n * 2 - 1 ) / 2 + 0.5
 }
 Pacer.bounce.in.label = 'bounce'
 Pacer.bounce.in.style = 'in'

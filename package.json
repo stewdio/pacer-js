@@ -1,39 +1,50 @@
 {
-  "name": "pacer-js",
-  "version": "1.0.8",
-  "description": "Driving you from A to B since 2025.",
-  "keywords": [
-    "animate",
-    "animation",
-    "keyframe",
-    "keyframing",
-    "tween",
-    "tweening",
-    "ease",
-    "easing",
-    "pace",
-    "pacer",
-    "pacer-js",
-    "pacing",
-    "snacks",
-    "snacks-js"
-  ],
-  "homepage": "https://github.com/stewdio/pacer-jsr#readme",
-  "bugs": {
-    "url": "https://github.com/stewdio/pacer-js/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/stewdio/pacer-js.git"
-  },
-  "license": "MIT",
-  "author": "Stewart Smith",
-  "type": "module",
-  "main": "Pacer.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "dependencies": {
-    "snacks-js": "^1.0.3"
-  }
+	"name": "pacer-js",
+	"version": "1.0.9",
+	"description": "Driving you from A to B since 2025.",
+	"author": "Stewart Smith",
+	"license": "MIT",
+	"homepage": "https://github.com/stewdio/pacer-jsr#readme",
+	"repository": {
+		
+		"type": "git",
+		"url": "https://github.com/stewdio/pacer-js.git"
+	},
+	"type": "module",
+	"main": "Pacer.js",
+	"exports": {
+		
+		".": "./Pacer.js"
+	},
+	"files": [
+
+		"Pacer.js",
+		"README.md",
+		"LICENSE"
+	],
+	"keywords": [
+
+		"animate",
+		"animation",
+		"keyframe",
+		"keyframing",
+		"tween",
+		"tweening",
+		"ease",
+		"easing",
+		"pace",
+		"pacer",
+		"pacer-js",
+		"pacing",
+		"snacks",
+		"snacks-js"
+	],
+	"bugs": {
+
+		"url": "https://github.com/stewdio/pacer-js/issues"
+	},
+	"dependencies": {
+
+		"snacks-js": "^1.0.3"
+	}
 }
