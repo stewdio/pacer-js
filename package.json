@@ -1,6 +1,6 @@
 {
 	"name": "pacer-js",
-	"version": "1.0.9",
+	"version": "1.0.10",
 	"description": "Driving you from A to B since 2025.",
 	"author": "Stewart Smith",
 	"license": "MIT",
@@ -45,6 +45,6 @@
 	},
 	"dependencies": {
 
-		"snacks-js": "^1.0.3"
+		"snacks-js": "^1.1.0"
 	}
 }
